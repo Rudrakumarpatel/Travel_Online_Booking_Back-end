@@ -3,6 +3,7 @@ import twilio from 'twilio';
 import bcrypt from 'bcryptjs';
 import User from '../models/User.js';
 import { validationResult } from 'express-validator';
+import Vendor from '../models/Vendor.js';
 
 // Initialize Twilio client with credentials
 const twilioClient = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
@@ -97,7 +98,7 @@ export const googleAuth = async (req, res) => {
 };
 
 // Email/Password Authentication (Sign Up or Log In)
-export const emailAuth = async (req, res) => {
+export const User_emailAuth = async (req, res) => {
 
   // Check for validation errors
   const errors = validationResult(req);
@@ -131,3 +132,44 @@ export const emailAuth = async (req, res) => {
     res.status(500).json({ message: 'Email authentication failed' });
   }
 };
+
+
+// Authentication for Vendor
+
+export const Vendor_emailAuth = async (req, res) => {
+  // Check for validation errors
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { name,email,password,mobile } = req.body;
+
+  try {
+    let vendor = await Vendor.findOne({ where: { email } });
+    
+    if (!vendor) {
+      // Create new vendor if email doesn't exist
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+      vendor = await Vendor.create({name,email,mobile, password: hashedPassword });
+    }
+    else
+    {
+      // Check if password matches
+      const isMatch = await bcrypt.compare(password, vendor.password);
+      if (!isMatch) {
+        return res.status(400).json({ message: 'Invalid credentials' });
+      }
+    }
+
+    // Generate a JWT token for the vendor
+    const token = jwt.sign({ vendorId: vendor.id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+    res.status(200).json({ message: 'Vendor email login successful', token, Username:name});
+  }
+  catch (error) {
+    console.error('Error during vendor email authentication:', error);
+    res.status(500).json({ message: 'Vendor email authentication failed' });
+  }
+
+}
