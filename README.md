@@ -46,12 +46,20 @@ Authenticates a user via email and password.
 }
 ```
 
-#### **3. Wrong Credentials (Email Not Found)**
-- **Condition:** If the provided email is not registered.
+#### **3. Wrong Credentials (Email Not Valid)**
+- **Condition:** If the provided email is not valid.
 - **Response:**
 ```json
 {
-  "message": "Invalid credentials"
+  "errors": [
+    {
+      "type": "field",
+      "value": "rudratel1gmail.com",
+      "msg": "Invalid email format",
+      "path": "email",
+      "location": "body"
+    }
+  ]
 }
 ```
 
