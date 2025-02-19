@@ -13,10 +13,13 @@ app.use(cors());
 app.use(express.json());
 
 
-sequelize.sync({ force: false })
+sequelize.sync({ force: false})
   .then(() => console.log("Database synced successfully"))
   .catch((err) => console.error("Error syncing database:", err));
 
+  sequelize.sync({ alter: true })
+  .then(() => console.log("Database synchronized"))
+  .catch(err => console.error("Sync error:", err));
 
 // Connect to MySQL
 connectDB();

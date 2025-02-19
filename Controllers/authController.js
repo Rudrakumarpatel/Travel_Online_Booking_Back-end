@@ -144,10 +144,11 @@ export const Vendor_emailAuth = async (req, res) => {
   }
 
   const { name,email,password,mobile } = req.body;
-
+  
   try {
     let vendor = await Vendor.findOne({ where: { email } });
     
+    console.log("Vendor found:", vendor);
     if (!vendor) {
       // Create new vendor if email doesn't exist
       const salt = await bcrypt.genSalt(10);

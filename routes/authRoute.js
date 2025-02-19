@@ -21,7 +21,7 @@ router.post('/user-email-auth', [
   body('name').notEmpty().withMessage('Name is required')], User_emailAuth);
 
 router.post('/vendor-emailauth',[ body('email').isEmail().withMessage('Invalid email format'),
-  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long').isStrongPassword(),
+  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
   body('name').notEmpty().withMessage('Name is required'),body("mobile").notEmpty().isMobilePhone('any')], Vendor_emailAuth);
 
 export default router;
