@@ -8,9 +8,12 @@ const HomestayVilla = sequelize.define('Homestay&Villa', {
   pricePerNight: { type: DataTypes.FLOAT, allowNull: false },
   capacity: { type: DataTypes.INTEGER, allowNull: false },
   discountPerNight: { type: DataTypes.FLOAT, allowNull: true },
+  location: { type: DataTypes.STRING, allowNull: false },
+  checkavaliable: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
   amenities: { type: DataTypes.STRING, allowNull: true },
   checkInTime: { type: DataTypes.TIME, allowNull: true },
-  checkOutTime: { type: DataTypes.TIME, allowNull: true }
+  checkOutTime: { type: DataTypes.TIME, allowNull: true },
+  image: { type: DataTypes.STRING, allowNull: true }
 }, { timestamps: true });
 
 // 🔹 Listing-HomestayVilla Relationship

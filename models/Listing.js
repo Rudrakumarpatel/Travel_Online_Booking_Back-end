@@ -4,18 +4,17 @@ import Vendor from './Vendor.js';
 
 const Listing = sequelize.define('Listing', {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-  vendorId: { type: DataTypes.INTEGER, allowNull: false },
+  vendorId: { type: DataTypes.INTEGER, allowNull: false, index: true },
   type: { 
     type: DataTypes.ENUM('Hotel', 'Homestay&Villa', 'HolidayPackage'), 
     allowNull: false 
   },
   name: { type: DataTypes.STRING, allowNull: false },
   description: { type: DataTypes.TEXT, allowNull: true }, 
-  location: { type: DataTypes.STRING, allowNull: false },
-  checkavaliable: { type: DataTypes.BOOLEAN, allowNull: false },
+  isdiscount: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
   city: { type: DataTypes.STRING, allowNull: false },
-  Contry: { type: DataTypes.STRING, allowNull: false },
-  image: { type: DataTypes.STRING, allowNull: true }
+  country: { type: DataTypes.STRING, allowNull: false },
+  images: { type: DataTypes.JSON, allowNull: true } 
 }, { timestamps: true });
 
 // 🔹 Vendor-Listing Relationship

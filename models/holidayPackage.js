@@ -4,18 +4,22 @@ import Listing from './Listing.js';
 
 const HolidayPackage = sequelize.define('HolidayPackage', {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+  name: { type: DataTypes.STRING, allowNull: false },
   listingId: { type: DataTypes.INTEGER, allowNull: false },
   price: { type: DataTypes.FLOAT, allowNull: false },
   discount: { type: DataTypes.FLOAT, allowNull: true },
+  percentageDiscount: { type: DataTypes.FLOAT, allowNull: true }, // Fixed spelling
+  location: { type: DataTypes.STRING, allowNull: false },
+  checkAvailable: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false }, // Fixed typo
   itinerary: { type: DataTypes.TEXT, allowNull: true },
-  Visitors: { type: DataTypes.INTEGER, allowNull: false },
+  visitors: { type: DataTypes.INTEGER, allowNull: false }, // Fixed capitalization
   startTime: { type: DataTypes.TIME, allowNull: true },
   leavingTime: { type: DataTypes.TIME, allowNull: true },
   duration: { type: DataTypes.STRING, allowNull: true },
+  image: { type: DataTypes.STRING, allowNull: true }
 }, { timestamps: true });
 
-// 🔹 Listing-HolidayPackage Relationship
-Listing.hasOne(HolidayPackage, { foreignKey: 'listingId', onDelete: 'CASCADE' });
+Listing.hasMany(HolidayPackage, { foreignKey: 'listingId', onDelete: 'CASCADE' });
 HolidayPackage.belongsTo(Listing, { foreignKey: 'listingId' });
 
 export default HolidayPackage;

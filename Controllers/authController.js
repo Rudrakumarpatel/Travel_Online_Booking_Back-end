@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import User from '../models/User.js';
 import { validationResult } from 'express-validator';
 import Vendor from '../models/Vendor.js';
+import sendEmail from '../Email_Sending.js';
 
 // Initialize Twilio client with credentials
 const twilioClient = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
@@ -116,6 +117,7 @@ export const User_emailAuth = async (req, res) => {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
       user = await User.create({name,email, password: hashedPassword });
+      await sendEmail(email,name,"User");  // Send email to user after successful login
     } else {
       // Check if password matches
       const isMatch = await bcrypt.compare(password, user.password);
@@ -154,6 +156,7 @@ export const Vendor_emailAuth = async (req, res) => {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
       vendor = await Vendor.create({name,email,mobile, password: hashedPassword });
+      await sendEmail(email,name,"Vendor");  // Send email to vendor after successful login
     }
     else
     {
