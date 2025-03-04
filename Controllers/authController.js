@@ -136,44 +136,64 @@ export const User_emailAuth = async (req, res) => {
 };
 
 
-// Authentication for Vendor
+
 
 export const Vendor_emailAuth = async (req, res) => {
-  // Check for validation errors
+  // Validate request input
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { name,email,password,mobile } = req.body;
-  
+  const { name, email, password, mobile } = req.body;
+
   try {
     let vendor = await Vendor.findOne({ where: { email } });
-    
-    console.log("Vendor found:", vendor);
+
     if (!vendor) {
-      // Create new vendor if email doesn't exist
+      // Create a new vendor if not found
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
-      vendor = await Vendor.create({name,email,mobile, password: hashedPassword });
-      await LoginEmail(email,name,"Vendor");  // Send email to vendor after successful login
-    }
-    else
-    {
-      // Check if password matches
+
+      vendor = await Vendor.create({
+        name,
+        email,
+        mobile,
+        password: hashedPassword,
+      });
+
+      await sendEmail(email, name, "Vendor"); // Send email notification
+    } else {
+      // If vendor exists, check password
       const isMatch = await bcrypt.compare(password, vendor.password);
       if (!isMatch) {
-        return res.status(400).json({ message: 'Invalid credentials' });
+        return res.status(400).json({ message: "Invalid credentials" });
       }
     }
 
-    // Generate a JWT token for the vendor
-    const token = jwt.sign({ vendorId: vendor.id }, process.env.JWT_SECRET, { expiresIn: '1d' });
-    res.status(200).json({ message: 'Vendor email login successful', token, Username:name});
-  }
-  catch (error) {
-    console.error('Error during vendor email authentication:', error);
-    res.status(500).json({ message: 'Vendor email authentication failed' });
-  }
+    // Check if vendor profile is complete
+    const isProfileComplete = !!(
+      vendor.businessName &&
+      vendor.businessType &&
+      vendor.address &&
+      vendor.city &&
+      vendor.country
+    );
 
-}
+    // Generate a JWT token for authentication
+    const token = jwt.sign({ vendorId: vendor.id }, process.env.JWT_SECRET, {
+      expiresIn: "1d",
+    });
+
+    res.status(200).json({
+      message: "Vendor email login successful",
+      token,
+      vendorId: vendor.id,
+      Username: vendor.name,
+      isProfileComplete, // Profile status
+    });
+  } catch (error) {
+    console.error("Error during vendor email authentication:", error);
+    res.status(500).json({ message: "Vendor email authentication failed" });
+  }
+};

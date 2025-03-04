@@ -1,5 +1,5 @@
 import express from 'express';
-import { sendOTP, verifyOTP, googleAuth, User_emailAuth, Vendor_emailAuth } from '../Controllers/authController.js';
+import { sendOTP, verifyOTP, googleAuth, User_emailAuth, Vendor_emailAuth,vendorSetup } from '../Controllers/authController.js';
 import { body, validationResult } from 'express-validator';
 import verifyToken from '../middlewares/authMiddleware.js';
 
@@ -17,11 +17,12 @@ router.post('/google-auth', googleAuth);
 // Route to authenticate via Email/Password
 router.post('/user-email-auth', [
   body('email').isEmail().withMessage('Invalid email format'),
-  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
+  body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long'),
   body('name').notEmpty().withMessage('Name is required')], User_emailAuth);
 
 router.post('/vendor-emailauth',[ body('email').isEmail().withMessage('Invalid email format'),
-  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
+  body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long'),
   body('name').notEmpty().withMessage('Name is required'),body("mobile").notEmpty().isMobilePhone('any')], Vendor_emailAuth);
 
+router.post('/vendor-setup', verifyToken, vendorSetup);
 export default router;
