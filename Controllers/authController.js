@@ -155,19 +155,13 @@ export const Vendor_emailAuth = async (req, res) => {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
 
-      vendor = await Vendor.create({
-        name,
-        email,
-        mobile,
-        password: hashedPassword,
-      });
-
-      await sendEmail(email, name, "Vendor"); // Send email notification
+      vendor = await Vendor.create({ name, email, mobile, password: hashedPassword });
+      await sendEmail(email, name, "Vendor");  // Send email notification
     } else {
       // If vendor exists, check password
       const isMatch = await bcrypt.compare(password, vendor.password);
       if (!isMatch) {
-        return res.status(400).json({ message: "Invalid credentials" });
+        return res.status(400).json({ message: 'Invalid credentials' });
       }
     }
 
@@ -181,19 +175,54 @@ export const Vendor_emailAuth = async (req, res) => {
     );
 
     // Generate a JWT token for authentication
-    const token = jwt.sign({ vendorId: vendor.id }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
-    });
+    const token = jwt.sign(
+      { vendorId: vendor.id },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
 
     res.status(200).json({
-      message: "Vendor email login successful",
+      message: 'Vendor email login successful',
       token,
-      vendorId: vendor.id,
+      vendorId: vendor.id, // ✅ Send vendorId explicitly
       Username: vendor.name,
       isProfileComplete, // Profile status
     });
   } catch (error) {
-    console.error("Error during vendor email authentication:", error);
-    res.status(500).json({ message: "Vendor email authentication failed" });
+    console.error('Error during vendor email authentication:', error);
+    res.status(500).json({ message: 'Vendor email authentication failed' });
+  }
+};
+
+export const vendorSetup = async (req, res) => {
+  
+
+  const { businessName, businessType, country, address, city } = req.body;
+  const vendorId = req.vendorId; // Extract from `verifyToken`
+
+  if (!vendorId) {
+    return res.status(401).json({ message: "Unauthorized: No vendor ID provided" });
+  }
+
+  try {
+    const vendor = await Vendor.findByPk(vendorId);
+
+    if (!vendor) {
+      return res.status(404).json({ message: "Vendor not found" });
+    }
+
+    vendor.businessName = businessName;
+    vendor.businessType = businessType;
+    vendor.country = country;
+    vendor.address = address;
+    vendor.city = city;
+    vendor.profileCompleted = true;
+
+    await vendor.save();
+
+    res.status(200).json({ message: "Profile setup completed" });
+  } catch (error) {
+    console.error("Profile setup error:", error);
+    res.status(500).json({ message: "Profile setup error" });
   }
 };
