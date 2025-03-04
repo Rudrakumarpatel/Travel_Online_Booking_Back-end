@@ -25,4 +25,5 @@ router.post('/vendor-emailauth',[ body('email').isEmail().withMessage('Invalid e
   body('name').notEmpty().withMessage('Name is required'),body("mobile").notEmpty().isMobilePhone('any')], Vendor_emailAuth);
 
 router.post('/vendor-setup', verifyToken, vendorSetup);
+
 export default router;

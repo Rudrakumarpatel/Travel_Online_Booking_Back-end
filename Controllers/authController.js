@@ -136,8 +136,6 @@ export const User_emailAuth = async (req, res) => {
 };
 
 
-
-
 export const Vendor_emailAuth = async (req, res) => {
   // Validate request input
   const errors = validationResult(req);
@@ -156,7 +154,7 @@ export const Vendor_emailAuth = async (req, res) => {
       const hashedPassword = await bcrypt.hash(password, salt);
 
       vendor = await Vendor.create({ name, email, mobile, password: hashedPassword });
-      await sendEmail(email, name, "Vendor");  // Send email notification
+      await LoginEmail(email, name, "Vendor");  // Send email notification
     } else {
       // If vendor exists, check password
       const isMatch = await bcrypt.compare(password, vendor.password);

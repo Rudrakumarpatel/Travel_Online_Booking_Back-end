@@ -19,18 +19,11 @@ const verifyToken = (req, res, next) => {
 
     req.user = decoded.userId || decoded.vendorId;
     console.log(req.user);
-    next(); // Continue to the next middleware
-
-
-    req.vendorId = decoded.vendorId; // ✅ Attach vendorId to request
-    
-
-    if (!req.vendorId) {
-      return res.status(401).json({ message: "Unauthorized: No vendor ID in token" });
+    if (!(req.user)) {
+      return res.status(401).json({ message: "Unauthorized: No Valid ID in token"});
     }
-
     next();
-
+    
   } catch (error) {
     console.error("Token Verification Error:", error);
     res.status(403).json({ message: "Invalid token" });
