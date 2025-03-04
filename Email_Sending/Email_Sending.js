@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Function to send email
-const sendEmail = async (email, name, role) => {
+export const LoginEmail = async (email, name, role) => {
   try {
     const transporter = nodemailer.createTransport({
       host: 'smtp-relay.brevo.com',
@@ -51,4 +51,40 @@ Travel Online Booking Team`;
   }
 };
 
-export default sendEmail;
+export const UpdateProfileEmail = async (email, name) => {
+  try {
+    const transporter = nodemailer.createTransport({
+      host: 'smtp-relay.brevo.com',
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+      }
+    });
+
+    // Define email content based on role
+    const text = `Hello ${name},Your profile has been successfully updated. If you did not make this change, please contact support.
+    
+    Thank you for using our platform!
+
+    Best Regards,
+    Travel Online Booking App
+    info@sciecore.com | http://www.sciecore.com`
+
+
+    const mailOptions = {
+      from: process.env.EMAIL_FROM,
+      to: email,
+      subject: 'Profile Update Confirmation',
+      text: text
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log('Email sent successfully');
+  } catch (error) {
+    console.error('Error sending email:', error);
+  }
+}
+
+

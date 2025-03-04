@@ -6,6 +6,7 @@ import authRoutes from './routes/authRoute.js';
 import search_Location from './routes/search_Location.js';
 import offers from './routes/offers.js';
 import allListing from './routes/allListingRoute.js';
+import editProfile from './routes/editProfileRoute.js'
 
 dotenv.config();
 const app = express();
@@ -26,7 +27,7 @@ connectDB().then(() => {
 app.use('/api/auth', authRoutes);
 app.use('/api/search', search_Location);
 app.use("/api/Offers",offers);
-
+app.use("/api/Edit", editProfile);
 app.use("/api/allListing",allListing);
 
 // Start the server

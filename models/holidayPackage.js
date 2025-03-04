@@ -10,7 +10,6 @@ const HolidayPackage = sequelize.define('HolidayPackage', {
   discount: { type: DataTypes.FLOAT, allowNull: true },
   percentageDiscount: { type: DataTypes.FLOAT, allowNull: true }, // Fixed spelling
   location: { type: DataTypes.STRING, allowNull: false },
-  checkAvailable: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false }, // Fixed typo
   itinerary: { type: DataTypes.TEXT, allowNull: true },
   visitors: { type: DataTypes.INTEGER, allowNull: false }, // Fixed capitalization
   startTime: { type: DataTypes.TIME, allowNull: true },
