@@ -4,8 +4,6 @@ const verifyToken = (req, res, next) => {
 
   const token = req.header("Authorization").split(" ")[1];
 
-  console.log(token);
-
   const authHeader = req.header("Authorization");
 
 
@@ -17,9 +15,8 @@ const verifyToken = (req, res, next) => {
     const token = authHeader.split(" ")[1]; // Extract token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    req.user = decoded.userId || decoded.vendorId;
-    console.log(req.user);
-    if (!(req.user)) {
+    req.id = decoded.userId || decoded.vendorId;
+    if (!(req.id)) {
       return res.status(401).json({ message: "Unauthorized: No Valid ID in token"});
     }
     next();

@@ -3,7 +3,7 @@ import Vendor from '../models/Vendor.js';
 
 export const updateVendorProfile = async (req, res) => {
   try {
-    const id = req.user;
+    const id = req.id;
     const updates = req.body; // Get provided fields
     console.log(id);
     console.log(updates);
