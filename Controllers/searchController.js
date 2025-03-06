@@ -1,47 +1,20 @@
+import Listing from '../models/Listing.js';
+
 export const searchLocation = async (req, res) => {
   const { city } = req.body;
 
-  //This Destinations From HolidayPakaage API| Currently it is only Testing Perpose.
-  const holidayDestinations = [
-    "Goa",
-    "Manali",
-    "Shimla",
-    "Ooty",
-    "Munnar",
-    "Darjeeling",
-    "Andaman",
-    "Rishikesh",
-    "Udaipur",
-    "Jaipur",
-    "Agra",
-    "Varanasi",
-    "Leh",
-    "Kodaikanal",
-    "Coorg",
-    "Lonavala",
-    "Mahabaleshwar",
-    "Alleppey",
-    "Mysore",
-    "Gangtok",
-    "Pondicherry",
-    "Gokarna",
-    "Kanyakumari",
-    "Jaisalmer",
-    "Ranthambore",
-    "Chikmagalur",
-    "Mussoorie",
-    "Haridwar",
-    "Khajuraho",
-    "Hampi"
-  ];
+  const listingCity = await Listing.findAll({attributes:['city']});
 
-  if (!city || !holidayDestinations || !Array.isArray(holidayDestinations)) {
+  console.log(listingCity);
+  const cityName = listingCity.map((listing)=>listing.city);
+
+  if (!city || !cityName || !Array.isArray(cityName)) {
     return res.status(400).json({ error: "Invalid request data" });
   }
 
   const searchQuery = city.toLowerCase();
 
-  const locations = holidayDestinations
+  const locations = cityName
     .filter(item => item.toLowerCase().includes(searchQuery)) // Case-insensitive match
     .sort((a, b) => {
       let aStarts = a.toLowerCase().startsWith(searchQuery);
