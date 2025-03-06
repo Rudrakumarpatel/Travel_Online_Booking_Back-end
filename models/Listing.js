@@ -9,11 +9,8 @@ const Listing = sequelize.define('Listing', {
     type: DataTypes.ENUM('Hotel', 'Homestay&Villa', 'HolidayPackage'), 
     allowNull: false 
   },
-  name: { type: DataTypes.STRING, allowNull: false },
-  description: { type: DataTypes.TEXT, allowNull: true }, 
-  isdiscount: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
   city: { type: DataTypes.STRING, allowNull: false },
-  checkAvailable: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+  checkAvailable: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
   country: { type: DataTypes.STRING, allowNull: true },
   images: { type: DataTypes.JSON, allowNull: true } 
 }, { timestamps: true });

@@ -3,12 +3,13 @@ import Vendor from '../models/Vendor.js';
 import Listing from '../models/Listing.js';
 import HolidayPackage from '../models/holidayPackage.js';
 import { addFirstListingEmail } from '../Email_Sending/Email_Sending.js';
+import moment from 'moment/moment.js';
 
 
 export const addHolidayPackage = async (req, res) => {
   try {
     const id = req.id;
-    const { name, city, country, description, isdiscount, checkAvailable, images, packages } = req.body;
+    const { city, country, Listingimages, name, price, discount, location, description, itinerary, startTime, leavingTime, Packageimages, activeStatus } = req.body;
 
     // Step 1: Check if Vendor Exists
     const vendor = await Vendor.findByPk(id);
@@ -16,61 +17,71 @@ export const addHolidayPackage = async (req, res) => {
 
     const listingCount = await Listing.count({ where: { vendorId: id } });
     let listing = null;
-    console.log("listing Count",listingCount);
+    console.log("Listing Count:", listingCount);
+
+    // Step 2: Check if Listing Exists for the City
     if (listingCount !== 0) {
       listing = await Listing.findOne({ where: { vendorId: id, city } });
     }
     
-    // Step 2: Check if Listing Exists for the City
+    if (listing && Listingimages) {
+      listing.images = [...(listing.images || []), ...(Array.isArray(Listingimages) ? Listingimages : [Listingimages])];
+      await listing.save();
+    }
+
     if (!listing) {
       listing = await Listing.create({
         vendorId: id,
         type: 'HolidayPackage',
-        name,
         city,
         country,
-        description: description || '',
-        isdiscount: isdiscount || false,
-        checkAvailable: checkAvailable || false,
-        images: images || []
+        images: Listingimages || []
       });
     }
-    
-    // Step 3: Add HolidayPackages to the Existing Listing
-    if (packages && Array.isArray(packages)) {
-      await HolidayPackage.bulkCreate(
-        packages.map(pkg => ({
-          listingId: listing.id,
-          name: pkg.name,
-          price: pkg.price,
-          discount: pkg.discount || 0,
-          percentageDiscount: (pkg.discount / pkg.price) * 100,
-          location: pkg.location,
-          itinerary: pkg.itinerary || '',
-          visitors: Math.max(1, Math.floor(pkg.price / 1000)),
-          startTime: pkg.startTime || null,
-          leavingTime: pkg.leavingTime || null,
-          duration: pkg.duration || '',
-          image: pkg.image || '',
-          activeStatus:pkg.activeStatus
-        }))
-      );
-    }
-    
-    // Step 4: Update Vendor activePackages and UpdatePackage
-    if (packages && Array.isArray(packages)) {
-        packages.map(async (pkg) =>{
-        vendor.activePackages = vendor.activePackages + 1;
-        vendor.packagesUploaded = vendor.packagesUploaded + 1;
-          await vendor.save();
-        });
-      }
 
-    // Step 5: Send Email if this is the first listing created by the vendor
-    if(listingCount === 0) {
-      addFirstListingEmail(vendor.email,vendor.name,listing.name);
+    // Step 3: Prevent Duplicate Packages
+    const existingPackage = await HolidayPackage.findOne({
+      where: { listingId: listing.id, name, location }
+    });
+
+    if (existingPackage) {
+      return res.status(400).json({ message: "A package with the same name and location already exists." });
     }
-    return res.status(201).json({ message: "Holiday Packages added successfully", listingId: listing.id });
+
+    // Step 4: Create HolidayPackage
+    const holidayPackage = await HolidayPackage.create({
+      listingId: listing.id,
+      name,
+      price,
+      discount: discount || 0,
+      isdiscount: discount ? true : false,
+      percentageDiscount: (discount / price) * 100,
+      location,
+      itinerary: itinerary || '',
+      description: description || '',
+      visitors: Math.max(1, Math.floor(price / 1000)),
+      startTime: startTime || null,
+      leavingTime: leavingTime || null,
+      duration: startTime && leavingTime
+        ? moment(leavingTime).diff(moment(startTime), 'days') + ' days'
+        : '',
+      images: Packageimages || [],
+      activeStatus: activeStatus !== false // Default to true if not provided
+    });
+
+    // Step 5: Update Vendor activePackages and packagesUploaded
+    if (holidayPackage.activeStatus) {
+      vendor.activePackages += 1;
+    }
+    vendor.packagesUploaded += 1;
+    await vendor.save();
+
+    // Step 6: Send Email if this is the first listing created by the vendor
+    if (listingCount === 0) {
+      addFirstListingEmail(vendor.email, vendor.name, holidayPackage.name);
+    }
+
+    return res.status(201).json({ message: "Holiday Package added successfully", holidayPackageId: holidayPackage.id });
 
   } catch (error) {
     console.error(error);

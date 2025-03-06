@@ -6,7 +6,6 @@ import authRoutes from './routes/authRoute.js';
 import search_Location from './routes/search_Location.js';
 import offers from './routes/offers.js';
 import allListing from './routes/allListingRoute.js';
-
 import editProfile from './routes/editProfileRoute.js'
 import addListing from './routes/addListingRoute.js'
 
