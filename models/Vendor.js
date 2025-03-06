@@ -22,6 +22,6 @@ const Vendor = sequelize.define('Vendor', {
   // Package Details (Optional)
   packagesUploaded: { type: DataTypes.INTEGER, defaultValue: 0, allowNull: true },
   activePackages: { type: DataTypes.INTEGER, defaultValue: 0, allowNull: true },
-});
+},{ timestamps: true });
 
 export default Vendor;

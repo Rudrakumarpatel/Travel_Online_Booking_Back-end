@@ -14,7 +14,7 @@ const Listing = sequelize.define('Listing', {
   isdiscount: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
   city: { type: DataTypes.STRING, allowNull: false },
   checkAvailable: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
-  country: { type: DataTypes.STRING, allowNull: false },
+  country: { type: DataTypes.STRING, allowNull: true },
   images: { type: DataTypes.JSON, allowNull: true } 
 }, { timestamps: true });
 

@@ -9,7 +9,7 @@ const Hotel = sequelize.define('Hotel', {
   discountPerNight: { type: DataTypes.FLOAT, allowNull: true },
   availableRooms: { type: DataTypes.INTEGER, allowNull: false },
   location: { type: DataTypes.STRING, allowNull: false },
-  checkavaliable: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+  roomsavaliable: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
   amenities: { type: DataTypes.STRING, allowNull: true },
   checkInTime: { type: DataTypes.TIME, allowNull: true },
   checkOutTime: { type: DataTypes.TIME, allowNull: true },

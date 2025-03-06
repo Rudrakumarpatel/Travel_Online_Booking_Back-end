@@ -182,7 +182,7 @@ export const Vendor_emailAuth = async (req, res) => {
     res.status(200).json({
       message: 'Vendor email login successful',
       token,
-      vendorId: vendor.id, // ✅ Send vendorId explicitly
+      vendorId: vendor.id, // Send vendorId explicitly
       Username: vendor.name,
       isProfileComplete, // Profile status
     });
@@ -196,7 +196,10 @@ export const vendorSetup = async (req, res) => {
   
 
   const { businessName, businessType, country, address, city } = req.body;
-  const vendorId = req.user; // Extract from `verifyToken`
+
+
+  const vendorId = req.id;
+
 
   if (!vendorId) {
     return res.status(401).json({ message: "Unauthorized: No vendor ID provided" });

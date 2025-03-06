@@ -11,11 +11,13 @@ const HolidayPackage = sequelize.define('HolidayPackage', {
   percentageDiscount: { type: DataTypes.FLOAT, allowNull: true }, // Fixed spelling
   location: { type: DataTypes.STRING, allowNull: false },
   itinerary: { type: DataTypes.TEXT, allowNull: true },
-  visitors: { type: DataTypes.INTEGER, allowNull: false }, // Fixed capitalization
-  startTime: { type: DataTypes.TIME, allowNull: true },
-  leavingTime: { type: DataTypes.TIME, allowNull: true },
+  description: { type: DataTypes.TEXT, allowNull: true }, 
+  visitors: { type: DataTypes.INTEGER, allowNull: true }, 
+  startTime: { type: DataTypes.DATE, allowNull: true },
+  leavingTime: { type: DataTypes.DATE, allowNull: true },
   duration: { type: DataTypes.STRING, allowNull: true },
-  image: { type: DataTypes.STRING, allowNull: true }
+  activeStatus: {type: DataTypes.BOOLEAN, allowNull: true,defaultValue: true},
+  image: { type: DataTypes.STRING, allowNull: false }
 }, { timestamps: true });
 
 Listing.hasMany(HolidayPackage, { foreignKey: 'listingId', onDelete: 'CASCADE' });

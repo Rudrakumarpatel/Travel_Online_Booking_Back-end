@@ -1,9 +1,9 @@
 import express from 'express';
-import { allHolidayPackages } from '../Controllers/listringController.js';
+import {addHolidayPackage} from '../Controllers/addListingController.js';
 import verifyToken from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-router.get("/allHolidayPackages",verifyToken,allHolidayPackages);
+router.post("/addHolidayPackage",verifyToken,addHolidayPackage);
 
 export default router;
