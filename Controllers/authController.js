@@ -196,7 +196,7 @@ export const vendorSetup = async (req, res) => {
   
 
   const { businessName, businessType, country, address, city } = req.body;
-  const vendorId = req.vendorId; // Extract from `verifyToken`
+  const vendorId = req.user; // Extract from `verifyToken`
 
   if (!vendorId) {
     return res.status(401).json({ message: "Unauthorized: No vendor ID provided" });
