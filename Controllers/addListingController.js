@@ -1,4 +1,3 @@
-import express from 'express';
 import Vendor from '../models/Vendor.js';
 import Listing from '../models/Listing.js';
 import HolidayPackage from '../models/holidayPackage.js';
