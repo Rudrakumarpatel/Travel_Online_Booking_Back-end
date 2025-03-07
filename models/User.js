@@ -7,8 +7,8 @@ const User = sequelize.define('User', {
   email: { type: DataTypes.STRING, unique: true, allowNull: false },
   mobile: { type: DataTypes.STRING, unique: true, allowNull: true},
   password: { type: DataTypes.STRING, allowNull: false }, 
-  googleId: { type: DataTypes.STRING, unique: true, allowNull: true },  
-  otp: { type: DataTypes.STRING, allowNull: true },  
+  // googleId: { type: DataTypes.STRING, unique: true, allowNull: true },  
+  // otp: { type: DataTypes.STRING, allowNull: true },  
 },{ timestamps: true });
 
 export default User;

@@ -8,7 +8,7 @@ import offers from './routes/offers.js';
 import allListing from './routes/allListingRoute.js';
 import editProfile from './routes/editProfileRoute.js'
 import addListing from './routes/addListingRoute.js'
-
+import editListing from './routes/editListingRouter.js'
 dotenv.config();
 const app = express();
 
@@ -31,6 +31,7 @@ app.use("/api/Offers",offers);
 app.use("/api/Edit", editProfile);
 app.use("/api/allListing",allListing);
 app.use("/api/addListing",addListing);
+app.use("/api/EditListing",editListing);
 
 // Start the server
 const PORT = process.env.PORT || 5001;

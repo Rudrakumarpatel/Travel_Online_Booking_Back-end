@@ -9,8 +9,8 @@ const Vendor = sequelize.define('Vendor', {
   password: { type: DataTypes.STRING, allowNull: false },
 
   // Optional Fields (Not required at login)
-  googleId: { type: DataTypes.STRING, unique: true, allowNull: true },
-  otp: { type: DataTypes.STRING, allowNull: true },
+  // googleId: { type: DataTypes.STRING, unique: true, allowNull: true },
+  // otp: { type: DataTypes.STRING, allowNull: true },
 
   // Updated to properly handle array of business types
   businessName: { type: DataTypes.STRING, allowNull: true },
@@ -20,8 +20,8 @@ const Vendor = sequelize.define('Vendor', {
   country: { type: DataTypes.STRING, allowNull: true },
 
   // Package Details (Optional)
-  packagesUploaded: { type: DataTypes.INTEGER, defaultValue: 0, allowNull: true },
-  activePackages: { type: DataTypes.INTEGER, defaultValue: 0, allowNull: true },
+  packagesUploaded: { type: DataTypes.INTEGER, defaultValue: 0, allowNull: false },
+  activePackages: { type: DataTypes.INTEGER, defaultValue: 0, allowNull: false },
 },{ timestamps: true });
 
 export default Vendor;

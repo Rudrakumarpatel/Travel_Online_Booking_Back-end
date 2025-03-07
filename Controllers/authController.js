@@ -10,93 +10,93 @@ import {LoginEmail} from '../Email_Sending/Email_Sending.js';
 const twilioClient = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
 
 // Send OTP to User's Mobile
-export const sendOTP = async (req, res) => {
-  const { mobile } = req.body;  // User's mobile number from frontend
+// export const sendOTP = async (req, res) => {
+//   const { mobile } = req.body;  // User's mobile number from frontend
 
-  try {
-    // Generate OTP (random 6-digit number)
-    const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();  // 6-digit OTP
+//   try {
+//     // Generate OTP (random 6-digit number)
+//     const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();  // 6-digit OTP
 
-    // Send OTP via Twilio
-    await twilioClient.verify.v2.services(process.env.TWILIO_VERIFY_SERVICE_SID)
-      .verifications
-      .create({ to: `+${mobile}`, channel: 'sms' });  // Send OTP to the mobile number
+//     // Send OTP via Twilio
+//     await twilioClient.verify.v2.services(process.env.TWILIO_VERIFY_SERVICE_SID)
+//       .verifications
+//       .create({ to: `+${mobile}`, channel: 'sms' });  // Send OTP to the mobile number
 
-    // Check if user exists with the mobile number
-    let user = await User.findOne({ where: { mobile } });
+//     // Check if user exists with the mobile number
+//     let user = await User.findOne({ where: { mobile } });
 
-    if (!user) {
-      // If the user doesn't exist, create a new user
-      user = await User.create({ mobile, otp: generatedOtp });
-    } else {
-      // If user exists, update OTP for that user
-      user.otp = generatedOtp;
-      await user.save();
-    }
+//     if (!user) {
+//       // If the user doesn't exist, create a new user
+//       user = await User.create({ mobile, otp: generatedOtp });
+//     } else {
+//       // If user exists, update OTP for that user
+//       user.otp = generatedOtp;
+//       await user.save();
+//     }
 
-    res.json({ message: 'OTP sent successfully' });
-  } catch (error) {
-    console.error('Error sending OTP:', error);
-    res.status(500).json({ message: 'Error sending OTP' });
-  }
-};
+//     res.json({ message: 'OTP sent successfully' });
+//   } catch (error) {
+//     console.error('Error sending OTP:', error);
+//     res.status(500).json({ message: 'Error sending OTP' });
+//   }
+// };
 
-// Verify OTP entered by User
-export const verifyOTP = async (req, res) => {
-  const { mobile, otp } = req.body;  // User's mobile number and OTP entered by user
+// // Verify OTP entered by User
+// export const verifyOTP = async (req, res) => {
+//   const { mobile, otp } = req.body;  // User's mobile number and OTP entered by user
 
-  try {
-    const user = await User.findOne({ where: { mobile } });
-    if (!user) {
-      return res.status(400).json({ message: 'User not found' });
-    }
+//   try {
+//     const user = await User.findOne({ where: { mobile } });
+//     if (!user) {
+//       return res.status(400).json({ message: 'User not found' });
+//     }
 
-    // Check if OTP entered by user matches the stored OTP
-    if (user.otp !== otp) {
-      return res.status(400).json({ message: 'Invalid OTP' });
-    }
+//     // Check if OTP entered by user matches the stored OTP
+//     if (user.otp !== otp) {
+//       return res.status(400).json({ message: 'Invalid OTP' });
+//     }
 
-    // Clear OTP after successful verification
-    user.otp = null;
-    await user.save();
+//     // Clear OTP after successful verification
+//     user.otp = null;
+//     await user.save();
 
-    // Generate a JWT token for the user
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    res.json({ message: 'OTP verified successfully', token });
-  } catch (error) {
-    console.error('Error verifying OTP:', error);
-    res.status(500).json({ message: 'Error verifying OTP' });
-  }
-};
+//     // Generate a JWT token for the user
+//     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+//     res.json({ message: 'OTP verified successfully', token });
+//   } catch (error) {
+//     console.error('Error verifying OTP:', error);
+//     res.status(500).json({ message: 'Error verifying OTP' });
+//   }
+// };
 
-// Google Authentication (Sign Up or Log In)
-export const googleAuth = async (req, res) => {
-  const { tokenId } = req.body;  // Google ID token passed from frontend
+// // Google Authentication (Sign Up or Log In)
+// export const googleAuth = async (req, res) => {
+//   const { tokenId } = req.body;  // Google ID token passed from frontend
 
-  try {
-    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-    const ticket = await client.verifyIdToken({
-      idToken: tokenId,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
+//   try {
+//     const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+//     const ticket = await client.verifyIdToken({
+//       idToken: tokenId,
+//       audience: process.env.GOOGLE_CLIENT_ID,
+//     });
 
-    const { name, email, sub: googleId } = ticket.getPayload();  // Extract user data from Google
+//     const { name, email, sub: googleId } = ticket.getPayload();  // Extract user data from Google
 
-    let user = await User.findOne({ where: { googleId } });
+//     let user = await User.findOne({ where: { googleId } });
 
-    if (!user) {
-      // Create new user if not found
-      user = await User.create({ name, email, googleId });
-    }
+//     if (!user) {
+//       // Create new user if not found
+//       user = await User.create({ name, email, googleId });
+//     }
 
-    // Generate JWT for authenticated access
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    res.json({ message: 'Google login successful', token });
-  } catch (error) {
-    console.error('Error during Google authentication:', error);
-    res.status(500).json({ message: 'Google authentication failed' });
-  }
-};
+//     // Generate JWT for authenticated access
+//     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+//     res.json({ message: 'Google login successful', token });
+//   } catch (error) {
+//     console.error('Error during Google authentication:', error);
+//     res.status(500).json({ message: 'Google authentication failed' });
+//   }
+// };
 
 // Email/Password Authentication (Sign Up or Log In)
 export const User_emailAuth = async (req, res) => {

@@ -55,7 +55,7 @@ export const addHolidayPackage = async (req, res) => {
       price,
       discount: discount || 0,
       isdiscount: discount ? true : false,
-      percentageDiscount: (discount / price) * 100,
+      percentageDiscount: parseFloat((parseFloat(discount) / parseFloat(price)) * 100),
       location,
       itinerary: itinerary || '',
       description: description || '',
@@ -81,7 +81,7 @@ export const addHolidayPackage = async (req, res) => {
       addFirstListingEmail(vendor.email, vendor.name, holidayPackage.name);
     }
 
-    return res.status(201).json({ message: "Holiday Package added successfully", holidayPackageId: holidayPackage.id });
+    return res.status(201).json({ message: "Holiday Package added successfully", holidayPackagename: holidayPackage.name, city:listing.city});
 
   } catch (error) {
     console.error(error);

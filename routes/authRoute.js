@@ -1,18 +1,18 @@
 import express from 'express';
-import { sendOTP, verifyOTP, googleAuth, User_emailAuth, Vendor_emailAuth,vendorSetup } from '../Controllers/authController.js';
+import {User_emailAuth, Vendor_emailAuth,vendorSetup } from '../Controllers/authController.js';
 import { body, validationResult } from 'express-validator';
 import verifyToken from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-// Route to send OTP
-router.post('/send-otp', sendOTP);
+// // Route to send OTP
+// router.post('/send-otp', sendOTP);
 
-// Route to verify OTP
-router.post('/verify-otp', verifyOTP);
+// // Route to verify OTP
+// router.post('/verify-otp', verifyOTP);
 
-// Route to authenticate via Google (Google OAuth2)
-router.post('/google-auth', googleAuth);
+// // Route to authenticate via Google (Google OAuth2)
+// router.post('/google-auth', googleAuth);
 
 // Route to authenticate via Email/Password
 router.post('/user-email-auth', [
