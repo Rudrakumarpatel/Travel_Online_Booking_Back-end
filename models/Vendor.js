@@ -4,8 +4,8 @@ import { sequelize } from '../config/db.js';
 const Vendor = sequelize.define('Vendor', {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
   name: { type: DataTypes.STRING, allowNull: false },
-  email: { type: DataTypes.STRING, unique: true, allowNull: false },
-  mobile: { type: DataTypes.STRING, unique: true, allowNull: false },
+  email: { type: DataTypes.STRING, allowNull: false },
+  mobile: { type: DataTypes.STRING, allowNull: false },
   password: { type: DataTypes.STRING, allowNull: false },
 
   // Optional Fields (Not required at login)
