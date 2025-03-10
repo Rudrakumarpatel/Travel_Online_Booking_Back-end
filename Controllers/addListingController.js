@@ -9,7 +9,7 @@ import moment from 'moment/moment.js';
 export const addHolidayPackage = async (req, res) => {
   try {
     const id = req.id;
-    const { city, country, Listingimages, name, price, discount, location, description, itinerary, startTime, leavingTime, Packageimages, activeStatus } = req.body;
+    const { city, country, name, price, discount, location, description, itinerary, startTime, leavingTime, Packageimages, activeStatus } = req.body;
 
     // Step 1: Check if Vendor Exists
     const vendor = await Vendor.findByPk(id);
@@ -24,18 +24,12 @@ export const addHolidayPackage = async (req, res) => {
       listing = await Listing.findOne({ where: { vendorId: id, city } });
     }
     
-    if (listing && Listingimages) {
-      listing.images = [...(listing.images || []), ...(Array.isArray(Listingimages) ? Listingimages : [Listingimages])];
-      await listing.save();
-    }
-
     if (!listing) {
       listing = await Listing.create({
         vendorId: id,
         type: 'HolidayPackage',
         city,
-        country,
-        images: Listingimages || []
+        country
       });
     }
 
