@@ -30,7 +30,7 @@ app.use('/api/search', search_Location);
 app.use("/api/Offers",offers);
 app.use("/api/Edit", editProfile);
 app.use("/api/allListing",allListing);
-app.use("/api/addListing",addListing);
+app.use("/api/vendors",addListing);
 app.use("/api/EditListing",editListing);
 
 // Start the server
