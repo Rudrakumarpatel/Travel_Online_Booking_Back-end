@@ -2,13 +2,19 @@ import Vendor from '../models/Vendor.js';
 import Listing from '../models/Listing.js';
 import HolidayPackage from '../models/holidayPackage.js';
 import { addFirstListingEmail } from '../Email_Sending/Email_Sending.js';
+import cloudinary from 'cloudinary';
 import moment from 'moment/moment.js';
 
+cloudinary.v2.config({
+  cloud_name: 'da92fi0bw', // Your cloud name
+  api_key: '156234261942858', // Your API key
+  api_secret: 'PSWbml0nlGEvL1CdNE61ZaWLEtA' 
+})
 
 export const addHolidayPackage = async (req, res) => {
   try {
     const id = req.id;
-    const { city, country, name, price, discount, location, description, itinerary, startTime, leavingTime, Packageimages, activeStatus } = req.body;
+    const { city, country, name, price, discount, location, description, itinerary, startTime, leavingTime, activeStatus } = req.body;
 
     // Step 1: Check if Vendor Exists
     const vendor = await Vendor.findByPk(id);
@@ -41,7 +47,20 @@ export const addHolidayPackage = async (req, res) => {
       return res.status(400).json({ message: "A package with the same name and location already exists." });
     }
 
-    // Step 4: Create HolidayPackage
+    // Step 4: Upload Images to Cloudinary and Create HolidayPackage
+    const Packageimages = req.files && req.files.Packageimages;
+    let imageUrls = [];
+
+    if (Packageimages) {
+      const files = Array.isArray(Packageimages) ? Packageimages : [Packageimages];
+      for (const file of files) {
+        const result = await cloudinary.v2.uploader.upload(file.tempFilePath, {
+          folder: 'holiday_packages' // Optional folder in Cloudinary
+        });
+        imageUrls.push(result.secure_url);
+      }
+    }
+
     const holidayPackage = await HolidayPackage.create({
       listingId: listing.id,
       name,
@@ -58,7 +77,7 @@ export const addHolidayPackage = async (req, res) => {
       duration: startTime && leavingTime
         ? moment(leavingTime).diff(moment(startTime), 'days') + ' days'
         : '',
-      images: Packageimages || [],
+      images: imageUrls, // Store Cloudinary URLs
       activeStatus: activeStatus !== false // Default to true if not provided
     });
 

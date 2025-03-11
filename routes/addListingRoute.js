@@ -4,6 +4,6 @@ import verifyToken from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-router.post("/packages",verifyToken,addHolidayPackage);
+router.post("/addHolidayPackage",verifyToken,addHolidayPackage);
 
 export default router;

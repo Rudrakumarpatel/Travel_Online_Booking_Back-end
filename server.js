@@ -9,12 +9,17 @@ import allListing from './routes/allListingRoute.js';
 import editProfile from './routes/editProfileRoute.js'
 import addListing from './routes/addListingRoute.js'
 import editListing from './routes/editListingRouter.js'
+import fileUpload from 'express-fileupload';
 dotenv.config();
 const app = express();
 
+app.use(fileUpload({ useTempFiles: true }));
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Connect to MySQL first
 connectDB().then(() => {
@@ -30,7 +35,7 @@ app.use('/api/search', search_Location);
 app.use("/api/Offers",offers);
 app.use("/api/Edit", editProfile);
 app.use("/api/allListing",allListing);
-app.use("/api/vendors",addListing);
+app.use("/api/addListing",addListing);
 app.use("/api/EditListing",editListing);
 
 // Start the server
