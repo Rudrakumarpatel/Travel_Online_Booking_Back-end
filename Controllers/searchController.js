@@ -12,6 +12,7 @@ export const searchLocation = async (req, res) => {
     return res.status(400).json({ error: "Invalid request data" });
   }
 
+
   const searchQuery = city.toLowerCase();
 
   const locations = cityName
