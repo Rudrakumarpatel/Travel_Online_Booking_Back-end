@@ -6,9 +6,9 @@ import cloudinary from 'cloudinary';
 import moment from 'moment/moment.js';
 
 cloudinary.v2.config({
-  cloud_name: 'da92fi0bw', // Your cloud name
-  api_key: '156234261942858', // Your API key
-  api_secret: 'PSWbml0nlGEvL1CdNE61ZaWLEtA' 
+  cloud_name: process.env.cloud_name,
+  api_key: process.env.api_key, 
+  api_secret: process.env.api_secret
 })
 
 export const addHolidayPackage = async (req, res) => {
@@ -28,7 +28,7 @@ export const addHolidayPackage = async (req, res) => {
     if (listingCount !== 0) {
       listing = await Listing.findOne({ where: { vendorId: id, city } });
     }
-    
+
     if (!listing) {
       listing = await Listing.create({
         vendorId: id,
@@ -40,7 +40,7 @@ export const addHolidayPackage = async (req, res) => {
 
     // Step 3: Prevent Duplicate Packages
     const existingPackage = await HolidayPackage.findOne({
-      where: { listingId: listing.id, name, location }
+      where: { listingId: listing.id, name}
     });
 
     if (existingPackage) {
@@ -48,15 +48,17 @@ export const addHolidayPackage = async (req, res) => {
     }
 
     // Step 4: Upload Images to Cloudinary and Create HolidayPackage
-    const Packageimages = req.files && req.files.Packageimages;
+    // const Packageimages = req.files && req.files.Packageimages;
     let imageUrls = [];
-
+    const Packageimages = req.files || req.files?.Packageimages
+    
     if (Packageimages) {
       const files = Array.isArray(Packageimages) ? Packageimages : [Packageimages];
       for (const file of files) {
         const result = await cloudinary.v2.uploader.upload(file.tempFilePath, {
           folder: 'holiday_packages' // Optional folder in Cloudinary
         });
+        console.log(result.secure_url);
         imageUrls.push(result.secure_url);
       }
     }
@@ -93,7 +95,7 @@ export const addHolidayPackage = async (req, res) => {
       addFirstListingEmail(vendor.email, vendor.name, holidayPackage.name);
     }
 
-    return res.status(201).json({ message: "Holiday Package added successfully", holidayPackagename: holidayPackage.name, city:listing.city});
+    return res.status(201).json({ message: "Holiday Package added successfully", holidayPackagename: holidayPackage.name, city: listing.city });
 
   } catch (error) {
     console.error(error);

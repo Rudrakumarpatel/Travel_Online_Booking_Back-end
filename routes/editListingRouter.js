@@ -1,9 +1,10 @@
 import express from 'express';
-import {editHolidayPackage} from '../Controllers/editListingController.js';
+import {DeleteHolidayPackage, editHolidayPackage} from '../Controllers/editListingController.js';
 import verifyToken from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-router.post("/editHolidayPackage",verifyToken,editHolidayPackage);
+router.put("/editHolidayPackage",verifyToken,editHolidayPackage);
+router.delete("/DeleteHolidayPackage",verifyToken,DeleteHolidayPackage)
 
 export default router;

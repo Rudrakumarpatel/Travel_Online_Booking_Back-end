@@ -15,7 +15,7 @@ export const searchLocation = async (req, res) => {
 
   const searchQuery = city.toLowerCase();
 
-  const locations = cityName
+  const cities = cityName
     .filter(item => item.toLowerCase().includes(searchQuery)) // Case-insensitive match
     .sort((a, b) => {
       let aStarts = a.toLowerCase().startsWith(searchQuery);
@@ -26,8 +26,8 @@ export const searchLocation = async (req, res) => {
       return a.localeCompare(b);
     });
 
-  if (locations.length == 0) {
+  if (cities.length == 0) {
     return res.status(201).json({ message: "Result is not Found" });
   };
-  return res.json({ locations });
+  return res.json({ cities });
 }

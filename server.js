@@ -10,10 +10,11 @@ import editProfile from './routes/editProfileRoute.js'
 import addListing from './routes/addListingRoute.js'
 import editListing from './routes/editListingRouter.js'
 import fileUpload from 'express-fileupload';
+import Dashboard from './routes/Dashboard.js';
 dotenv.config();
 const app = express();
 
-app.use(fileUpload({ useTempFiles: true }));
+app.use(fileUpload({ useTempFiles: true,tempFileDir: '/tmp/'}));
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -37,6 +38,7 @@ app.use("/api/Edit", editProfile);
 app.use("/api/allListing",allListing);
 app.use("/api/addListing",addListing);
 app.use("/api/EditListing",editListing);
+app.use("/api/Dashboard",Dashboard);
 
 // Start the server
 const PORT = process.env.PORT || 5001;
