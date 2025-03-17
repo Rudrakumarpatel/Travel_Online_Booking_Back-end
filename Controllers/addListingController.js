@@ -48,9 +48,8 @@ export const addHolidayPackage = async (req, res) => {
     }
 
     // Step 4: Upload Images to Cloudinary and Create HolidayPackage
-    // const Packageimages = req.files && req.files.Packageimages;
+    const Packageimages = req.files && req.files.Packageimages;
     let imageUrls = [];
-    const Packageimages = req.files || req.files?.Packageimages
     
     if (Packageimages) {
       const files = Array.isArray(Packageimages) ? Packageimages : [Packageimages];
