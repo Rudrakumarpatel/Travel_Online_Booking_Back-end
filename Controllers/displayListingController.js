@@ -22,7 +22,7 @@ export const display_HolidayPackages = async (req, res) => {
           attributes: ['city']
         }
       ],
-      attributes: ['name', 'activeStatus']
+      attributes: ['id','name', 'activeStatus']
     });
 
     if (!holidayPackages.length) {
@@ -31,6 +31,7 @@ export const display_HolidayPackages = async (req, res) => {
 
     // Format response
     const formattedResponse = holidayPackages.map(pkg => ({
+      id:pkg.id,
       city: pkg.Listing.city,
       holidayPackageName: pkg.name,
       status: pkg.activeStatus
