@@ -7,7 +7,7 @@ import moment from 'moment/moment.js';
 
 cloudinary.v2.config({
   cloud_name: process.env.cloud_name,
-  api_key: process.env.api_key, 
+  api_key: process.env.api_key,
   api_secret: process.env.api_secret
 })
 
@@ -40,7 +40,7 @@ export const addHolidayPackage = async (req, res) => {
 
     // Step 3: Prevent Duplicate Packages
     const existingPackage = await HolidayPackage.findOne({
-      where: { listingId: listing.id, name}
+      where: { listingId: listing.id, name }
     });
 
     if (existingPackage) {
@@ -50,7 +50,7 @@ export const addHolidayPackage = async (req, res) => {
     // Step 4: Upload Images to Cloudinary and Create HolidayPackage
     const Packageimages = req.files && req.files.Packageimages;
     let imageUrls = [];
-    
+
     if (Packageimages) {
       const files = Array.isArray(Packageimages) ? Packageimages : [Packageimages];
       for (const file of files) {
@@ -67,8 +67,8 @@ export const addHolidayPackage = async (req, res) => {
       name,
       price,
       discount: discount || 0,
-      isdiscount: discount ? true : false,
-      percentageDiscount: parseFloat((parseFloat(discount) / parseFloat(price)) * 100),
+      isdiscount: discount > 0 ? true : false,
+      percentageDiscount: discount ? parseFloat((parseFloat(discount) / parseFloat(price)) * 100) : 0,
       location,
       itinerary: itinerary || '',
       description: description || '',
@@ -79,7 +79,7 @@ export const addHolidayPackage = async (req, res) => {
         ? moment(leavingTime).diff(moment(startTime), 'days') + ' days'
         : '',
       images: imageUrls, // Store Cloudinary URLs
-      activeStatus: activeStatus !== false // Default to true if not provided
+      activeStatus: activeStatus === false ? false : true
     });
 
     // Step 5: Update Vendor activePackages and packagesUploaded
