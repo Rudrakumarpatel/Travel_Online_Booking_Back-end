@@ -144,10 +144,24 @@ export const DeleteHolidayPackage = async (req, res) => {
       return res.status(404).json({ message: "Listing not found" });
     }
 
+    const status = await HolidayPackage.findOne({
+      where: { listingId: listing.id, name:HolidayPackageName},
+      attributes: ['activeStatus']
+    })
+
+    const isActive = status?.dataValues?.activeStatus ?? false; 
+
     // Delete the Holiday Package
     const deletedHolidayPackage = await HolidayPackage.destroy({
       where: { listingId: listing.id, name: HolidayPackageName }
     });
+
+    //update vandor activePackages
+    if (isActive) {
+      vendor.activePackages -= 1;
+    }
+    vendor.packagesUploaded -= 1;
+    await vendor.save();
 
     if (!deletedHolidayPackage) {
       return res.status(404).json({ message: "No holiday package found with given details" });

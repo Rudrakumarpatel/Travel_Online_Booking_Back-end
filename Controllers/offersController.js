@@ -8,7 +8,7 @@ export const percentageOffers = async (req, res) => {
 
     const listings = await Listing.findAll({
       where: { type: 'HolidayPackage' },
-      attributes: ['id', 'city', 'country'],
+      attributes: ['id', 'city', 'country','images'],
       include: [
         {
           model: HolidayPackage,
@@ -18,11 +18,7 @@ export const percentageOffers = async (req, res) => {
             percentageDiscount: { [Op.lte]: percentageDiscount }
           },
           attributes: [
-            'id', 'name', 'price', 'percentageDiscount',
-            'discount',
-            'location',
-            'itinerary', 'visitors', 'startTime', 'leavingTime',
-            'duration', 'images'
+            'percentageDiscount',
           ]
         }
       ]
@@ -36,33 +32,7 @@ export const percentageOffers = async (req, res) => {
       });
     }
 
-    // Optimized data grouping by city
-    const groupedByCity = {};
-    listings.forEach(listing => {
-      const city = listing.city || "Unknown";
-      if (!groupedByCity[city]) groupedByCity[city] = [];
-
-      groupedByCity[city].push({
-        listingId: listing.id,
-        name: listing.name,
-        country: listing.country,
-        holidayPackages: listing.HolidayPackages.map(pkg => ({
-          id: pkg.id,
-          name: pkg.name,
-          price: pkg.price,
-          percentageDiscount: pkg.percentageDiscount,
-          location: pkg.location,
-          itinerary: pkg.itinerary,
-          visitors: pkg.visitors,
-          startTime: pkg.startTime,
-          leavingTime: pkg.leavingTime,
-          duration: pkg.duration,
-          images: pkg.images
-        }))
-      });
-    });
-
-    res.status(200).json({ success: true, data: groupedByCity });
+    res.status(200).json({ success: true, data: listings });
 
   } catch (error) {
     console.error("Error fetching percentage offers:", error);
@@ -124,21 +94,17 @@ const fetchHolidayPackages = async (filter) => {
     whereCondition.country = filter.country;
   }
 
-  // Apply isdiscount filter if true
-  if (filter.isdiscount !== undefined) {
-    whereCondition.isdiscount = true;
-  }
-
   const listings = await Listing.findAll({
     where: whereCondition,
-    attributes: ['id', 'city', 'country', 'images'], // Added 'image' attribute
+    attributes: ['id','city', 'country', 'images'], // Added 'image' attribute
     include: [{
       model: HolidayPackage,
-      attributes: ['id', 'name', 'price', 'discount', 'percentageDiscount', 'image', 'location', 'duration'],
+      where: { isdiscount: true,activeStatus:true},
+      attributes: ['percentageDiscount'],
     }]
   });
 
-  return groupByCity(listings);
+  return listings;
 };
 
 // Helper function to group listings by city

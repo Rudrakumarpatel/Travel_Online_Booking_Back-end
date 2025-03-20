@@ -49,7 +49,9 @@ export const addHolidayPackage = async (req, res) => {
 
     // Step 4: Upload Images to Cloudinary and Create HolidayPackage
     const Packageimages = req.files && req.files.Packageimages;
-    let imageUrls = [];
+    const Images = req.files && req.files.Packagephotos;
+    let thumbnailUrls = [];
+    let Photos = [];
 
     if (Packageimages) {
       const files = Array.isArray(Packageimages) ? Packageimages : [Packageimages];
@@ -58,9 +60,21 @@ export const addHolidayPackage = async (req, res) => {
           folder: 'holiday_packages' // Optional folder in Cloudinary
         });
         console.log(result.secure_url);
-        imageUrls.push(result.secure_url);
+        thumbnailUrls.push(result.secure_url);
       }
     }
+    if(Images)
+    {
+      const files = Array.isArray(Images) ? Images : [Images];
+      for (const file of files) {
+        const result = await cloudinary.v2.uploader.upload(file.tempFilePath, {
+          folder: 'holiday_packages' // Optional folder in Cloudinary
+        });
+        console.log(result.secure_url);
+        Photos.push(result.secure_url);
+      }
+    }
+
 
     const holidayPackage = await HolidayPackage.create({
       listingId: listing.id,
@@ -78,7 +92,8 @@ export const addHolidayPackage = async (req, res) => {
       duration: startTime && leavingTime
         ? moment(leavingTime).diff(moment(startTime), 'days') + ' days'
         : '',
-      images: imageUrls, // Store Cloudinary URLs
+      images: thumbnailUrls, // Store Cloudinary URLs
+      packageImages:Photos,
       activeStatus: activeStatus
     });
 

@@ -18,7 +18,7 @@ export const allHolidayPackages = async (req, res) => {
           'percentageDiscount', 'location', 'itinerary',
           'description',
           'visitors', 'startTime', 'leavingTime', 'duration',
-          'activeStatus', 'images'
+          'activeStatus', 'images','packageImages'
         ]
       }]
     });
@@ -42,13 +42,55 @@ export const allHolidayPackages = async (req, res) => {
         startTime: pkg.startTime,
         leavingTime: pkg.leavingTime,
         duration: pkg.duration,
-        images: pkg.images
+        images: pkg.images,
+        packageImages:pkg.packageImages
       }))
     }));
-
-    res.json(formattedListings);
+    
+    return res.json(formattedListings);
   } catch (error) {
     console.error('Error fetching holiday packages:', error);
-    res.status(500).json({ error: 'Failed to fetch holiday packages' });
+    return res.status(500).json({ error: 'Failed to fetch holiday packages' });
+  }
+};
+
+export const searchHolidayPackages = async (req, res) => {
+  try {
+    const { cityOrCountry, departureDate} = req.body;
+
+    if (!cityOrCountry) {
+      return res.status(400).json({ message: "City or Country is required." });
+    }
+
+    // Prepare filters
+    let whereCondition = { activeStatus: true };
+
+    if (departureDate) {
+      whereCondition.startTime = { [Op.gte]: new Date(departureDate) };
+    }
+
+    const holidayPackages = await HolidayPackage.findAll({
+      include: [
+        {
+          model: Listing,
+          where: {
+            [Op.or]: [{ city: cityOrCountry }, { country: cityOrCountry }],
+          },
+          attributes: ["city", "country"],
+        },
+      ],
+      where: whereCondition,
+      order: [["visitors", "DESC"]], // Sort by visitors in descending order
+    });
+
+    if (holidayPackages.length === 0) {
+      return res.status(404).json({ message: "No holiday packages found for the given criteria." });
+    }
+
+    return res.status(200).json({ holidayPackages });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error", error });
   }
 };
