@@ -15,7 +15,7 @@ export const editHolidayPackage = async (req, res) => {
     if (!vendor) {
       return res.status(404).json({ message: "Vendor not found" });
     }
-    const Listing1 = await Listing.findOne({where:{vendorId:id,id:listingId}});
+    const Listing1 = await Listing.findOne({ where: { vendorId: id, id: listingId } });
 
     if (!Listing1) {
       return res.status(404).json({ message: "Listing is not found" });
@@ -25,6 +25,14 @@ export const editHolidayPackage = async (req, res) => {
 
     if (!holidayPackage) {
       return res.status(404).json({ message: "Holiday Package not found" });
+    }
+
+    // Extract city and country for Listing
+    const { city, country, ...holidayPackageUpdates } = updateData;
+
+    // Update Listing (only city & country)
+    if (city !== undefined || country !== undefined) {
+      await Listing1.update({ city, country });
     }
 
     // Manually updating dependent fields
@@ -75,7 +83,7 @@ export const editHolidayPackage = async (req, res) => {
     // Update the holiday package
     await holidayPackage.update(updateData);
 
-    res.status(200).json({ message: "Holiday Package updated successfully"});
+    res.status(200).json({ message: "Holiday Package updated successfully" });
   }
   catch (error) {
     console.error(error);
@@ -85,7 +93,7 @@ export const editHolidayPackage = async (req, res) => {
 
 export const editPackageGetData = async (req, res) => {
   try {
-    const packageId = req.header('id'); 
+    const packageId = req.header('id');
     const listingId = req.header("listingId");
     const id = req.id;
 
@@ -94,13 +102,19 @@ export const editPackageGetData = async (req, res) => {
       return res.status(404).json({ message: "Vendor not found" });
     }
 
-    const Listing1 = await Listing.findOne({ where: { vendorId: id,id:listingId } });
+    const Listing1 = await Listing.findOne({ where: { vendorId: id, id: listingId } });
 
     if (!Listing1) {
       return res.status(404).json({ message: "Listing not found" });
     }
 
-    const holidayPackage = await HolidayPackage.findOne({ where: { listingId, id: packageId } });
+    const holidayPackage = await HolidayPackage.findOne({
+      where: { listingId, id: packageId },
+      include: {
+        model: Listing,
+        attributes: ['city', 'country']
+      }
+    });
 
     if (!holidayPackage) {
       return res.status(404).json({ message: "Holiday Package not found" });
