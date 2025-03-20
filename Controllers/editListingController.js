@@ -7,21 +7,21 @@ import Hotel from "../models/Hotel.js"
 
 export const editHolidayPackage = async (req, res) => {
   try {
-    const HolidayPackageName = req.header('HolidayPackageName');
-    const city = req.header('city');
+    const packageId = req.header("id");
+    const listingId = req.header("listingId");
     const updateData = req.body;
     const id = req.id;
     const vendor = await Vendor.findByPk(id);
     if (!vendor) {
       return res.status(404).json({ message: "Vendor not found" });
     }
-    const Listing1 = await Listing.findOne({where:{ vendorId: id, city }});
+    const Listing1 = await Listing.findOne({where:{vendorId:id,id:listingId}});
 
     if (!Listing1) {
       return res.status(404).json({ message: "Listing is not found" });
     }
 
-    const holidayPackage = await HolidayPackage.findOne({ where: { listingId: Listing1.id, name: HolidayPackageName } });
+    const holidayPackage = await HolidayPackage.findOne({ where: { listingId: Listing1.id, id: packageId } });
 
     if (!holidayPackage) {
       return res.status(404).json({ message: "Holiday Package not found" });
@@ -75,9 +75,39 @@ export const editHolidayPackage = async (req, res) => {
     // Update the holiday package
     await holidayPackage.update(updateData);
 
-    res.status(200).json({ message: "Holiday Package updated successfully", holidayPackage });
+    res.status(200).json({ message: "Holiday Package updated successfully"});
   }
   catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error", error });
+  }
+};
+
+export const editPackageGetData = async (req, res) => {
+  try {
+    const packageId = req.header('id'); 
+    const listingId = req.header("listingId");
+    const id = req.id;
+
+    const vendor = await Vendor.findByPk(id);
+    if (!vendor) {
+      return res.status(404).json({ message: "Vendor not found" });
+    }
+
+    const Listing1 = await Listing.findOne({ where: { vendorId: id,id:listingId } });
+
+    if (!Listing1) {
+      return res.status(404).json({ message: "Listing not found" });
+    }
+
+    const holidayPackage = await HolidayPackage.findOne({ where: { listingId, id: packageId } });
+
+    if (!holidayPackage) {
+      return res.status(404).json({ message: "Holiday Package not found" });
+    }
+
+    return res.status(200).json({ message: "Package Data", holidayPackage });
+  } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error", error });
   }

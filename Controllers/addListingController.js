@@ -79,7 +79,7 @@ export const addHolidayPackage = async (req, res) => {
         ? moment(leavingTime).diff(moment(startTime), 'days') + ' days'
         : '',
       images: imageUrls, // Store Cloudinary URLs
-      activeStatus: activeStatus === false ? false : true
+      activeStatus: activeStatus
     });
 
     // Step 5: Update Vendor activePackages and packagesUploaded
