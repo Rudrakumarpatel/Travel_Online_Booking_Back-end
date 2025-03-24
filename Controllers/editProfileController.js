@@ -1,4 +1,4 @@
-import { UpdateProfileEmail } from '../Email_Sending/Email_Sending.js';
+import { UpdateProfileEmail } from '../utility/Email_Sending.js';
 import Vendor from '../models/Vendor.js';
 
 export const updateVendorProfile = async (req, res) => {

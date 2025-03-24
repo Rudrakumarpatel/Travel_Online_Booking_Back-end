@@ -87,7 +87,7 @@ export const UpdateProfileEmail = async (email, name) => {
   }
 }
 
-export const addFirstListingEmail = async (email,name,Listingname)=>{
+export const addFirstListingEmail = async (email,name,Listingname,listingname)=>{
   try {
     const transporter = nodemailer.createTransport({
       host: 'smtp-relay.brevo.com',
@@ -102,7 +102,7 @@ export const addFirstListingEmail = async (email,name,Listingname)=>{
     // Define email content based on role
     const text = `Dear ${name},
 
-    Congratulations! Your first Package, ${Listingname}, has been successfully added to our platform. 🎊
+    Congratulations! Your first ${listingname}, ${Listingname}, has been successfully added to our platform. 🎊
 
     We're excited to have you onboard and look forward to helping you connect with more customers and grow your business. You can manage your listing and update details anytime in your vendor dashboard.
 

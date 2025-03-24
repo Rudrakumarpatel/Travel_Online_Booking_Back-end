@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 import User from '../models/User.js';
 import { validationResult } from 'express-validator';
 import Vendor from '../models/Vendor.js';
-import {LoginEmail} from '../Email_Sending/Email_Sending.js';
+import {LoginEmail} from '../utility/Email_Sending.js';
 
 // Initialize Twilio client with credentials
 const twilioClient = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);

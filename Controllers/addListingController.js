@@ -1,9 +1,10 @@
 import Vendor from '../models/Vendor.js';
 import Listing from '../models/Listing.js';
 import HolidayPackage from '../models/holidayPackage.js';
-import { addFirstListingEmail } from '../Email_Sending/Email_Sending.js';
+import { addFirstListingEmail } from '../utility/Email_Sending.js';
 import cloudinary from 'cloudinary';
 import moment from 'moment/moment.js';
+import Hotel from '../models/Hotel.js';
 
 cloudinary.v2.config({
   cloud_name: process.env.cloud_name,
@@ -48,8 +49,8 @@ export const addHolidayPackage = async (req, res) => {
     }
 
     // Step 4: Upload Images to Cloudinary and Create HolidayPackage
-    const Packageimages = req.files && req.files.Packageimages;
-    const Images = req.files && req.files.Packagephotos;
+    const Packageimages = req.files && req.files.Packageimages; // this is for thumbnil
+    const Images = req.files && req.files.Packagephotos;        // this is for inside package photos
     let thumbnailUrls = [];
     let Photos = [];
 
@@ -63,8 +64,7 @@ export const addHolidayPackage = async (req, res) => {
         thumbnailUrls.push(result.secure_url);
       }
     }
-    if(Images)
-    {
+    if (Images) {
       const files = Array.isArray(Images) ? Images : [Images];
       for (const file of files) {
         const result = await cloudinary.v2.uploader.upload(file.tempFilePath, {
@@ -93,7 +93,7 @@ export const addHolidayPackage = async (req, res) => {
         ? moment(leavingTime).diff(moment(startTime), 'days') + ' days'
         : '',
       images: thumbnailUrls, // Store Cloudinary URLs
-      packageImages:Photos,
+      packageImages: Photos,
       activeStatus: activeStatus
     });
 
@@ -106,7 +106,8 @@ export const addHolidayPackage = async (req, res) => {
 
     // Step 6: Send Email if this is the first listing created by the vendor
     if (listingCount === 0) {
-      addFirstListingEmail(vendor.email, vendor.name, holidayPackage.name);
+      const listingname = "HolidayPackage"
+      addFirstListingEmail(vendor.email, vendor.name, holidayPackage.name,listingname);
     }
 
     return res.status(201).json({ message: "Holiday Package added successfully", holidayPackagename: holidayPackage.name, city: listing.city });
@@ -116,3 +117,74 @@ export const addHolidayPackage = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const addHotels = async (req, res) => {
+
+  try {
+    const id = req.id;
+    const { city, country, name, price, availableRooms, discount, location, description, amenities, checkInTime, checkOutTime, image, packageImages } = req.body;
+
+    // Step 1: Check if Vendor Exists
+    const vendor = await Vendor.findByPk(id);
+    if (!vendor) return res.status(404).json({ message: "Vendor not found" });
+
+
+    const listingCount = await Listing.count({ where: { vendorId: id } });
+    let listing = null;
+    console.log("Listing Count:", listingCount);
+
+    // Step 2: Check if Listing Exists for the City
+    if (listingCount !== 0) {
+      listing = await Listing.findOne({ where: { vendorId: id, city } });
+    }
+
+    if (!listing) {
+      listing = await Listing.create({
+        vendorId: id,
+        type: 'Hotel',
+        city,
+        country
+      });
+    }
+
+    // Step 3: Prevent Duplicate Packages
+    const existingHotel = await Hotel.findOne({
+      where: { listingId: listing.id, location, name }
+    });
+
+    if (existingHotel) {
+      return res.status(400).json({ message: "A Hotel with the smme name & same location already exists." });
+    }
+
+    const hotel = await Hotel.create({
+      listingId: listing.id,
+      name,
+      pricePerNight: price,
+      discountPerNight: discount || 0,
+      isdiscount: discount > 0 ? true : false,
+      percentageDiscountPerNight: discount !== 0  ? parseFloat((parseFloat(discount) / parseFloat(price)) * 100) : 0,
+      location,
+      amenities,
+      description: description || '',
+      visitors: Math.max(1, Math.floor(price / 1000)),
+      checkInTime,
+      checkOutTime,
+      image: image, // Store Cloudinary URLs
+      packageImages,
+      availableRooms,
+      roomsAvailable: availableRooms > 0 ? true : false
+    });
+
+    if (listingCount === 0) {
+      const listingname = "Hotel"
+      addFirstListingEmail(vendor.email, vendor.name, hotel.name,listingname);
+    }
+
+    return res.status(201).json({ message: "Hotel added successfully", Hotelname: hotel.name, city: listing.city });
+  }
+  catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+
+}

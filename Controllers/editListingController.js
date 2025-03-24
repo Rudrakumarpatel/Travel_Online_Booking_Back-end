@@ -3,7 +3,13 @@ import Vendor from "../models/Vendor.js";
 import Listing from "../models/Listing.js";
 import homestayAndVilla from "../models/homestayAndVillas.js";
 import Hotel from "../models/Hotel.js"
+import cloudinary from 'cloudinary';
 
+cloudinary.v2.config({
+  cloud_name: process.env.cloud_name,
+  api_key: process.env.api_key,
+  api_secret: process.env.api_secret
+})
 
 export const editHolidayPackage = async (req, res) => {
   try {
@@ -11,38 +17,76 @@ export const editHolidayPackage = async (req, res) => {
     const listingId = req.header("listingId");
     const updateData = req.body;
     const id = req.id;
+    
     const vendor = await Vendor.findByPk(id);
-    if (!vendor) {
-      return res.status(404).json({ message: "Vendor not found" });
-    }
-    const Listing1 = await Listing.findOne({ where: { vendorId: id, id: listingId } });
+    if (!vendor) return res.status(404).json({ message: "Vendor not found" });
 
-    if (!Listing1) {
-      return res.status(404).json({ message: "Listing is not found" });
-    }
+    const listing = await Listing.findOne({ where: { vendorId: id, id: listingId } });
+    if (!listing) return res.status(404).json({ message: "Listing not found" });
 
-    const holidayPackage = await HolidayPackage.findOne({ where: { listingId: Listing1.id, id: packageId } });
+    const holidayPackage = await HolidayPackage.findOne({ where: { listingId: listing.id, id: packageId } });
+    if (!holidayPackage) return res.status(404).json({ message: "Holiday Package not found" });
 
-    if (!holidayPackage) {
-      return res.status(404).json({ message: "Holiday Package not found" });
-    }
 
-    // Extract city and country for Listing
+    // Extract city and country update for Listing
     const { city, country, ...holidayPackageUpdates } = updateData;
-
-    // Update Listing (only city & country)
     if (city !== undefined || country !== undefined) {
-      await Listing1.update({ city, country });
+      await listing.update({ city, country });
     }
 
-    // Manually updating dependent fields
-    //both price and discount in input
+
+    // Image Handling
+    const packageImages = req.files?.Packageimages; // Many images (inside package)
+    const thumbnailImages = req.files?.Packagephotos; // Thumbnail image
+
+    // Function to delete images from Cloudinary
+    const deleteFromCloudinary = async (imageUrls) => {
+      for (const url of imageUrls) {
+        const publicId = url.split('/').pop().split('.')[0]; // Extract publicId from URL
+        await cloudinary.uploader.destroy(publicId);
+      }
+    };
+
+    // Handle package images (inside package)
+    if (packageImages && packageImages.length > 0) {
+      if (holidayPackage.packageImages) {
+        await deleteFromCloudinary(holidayPackage.packageImages); // Delete old images
+      }
+      
+      const uploadedImages = await Promise.all(
+        packageImages.map(file => cloudinary.uploader.upload(file.path))
+      );
+
+      updateData.packageImages = uploadedImages.map(img => img.secure_url); // Save new images
+    }
+
+    // Handle thumbnail images
+    if (thumbnailImages && thumbnailImages.length > 0) {
+      if (holidayPackage.thumbnailImage) {
+        await deleteFromCloudinary([holidayPackage.thumbnailImage]); // Delete old thumbnail
+      }
+
+      const uploadedThumbnail = await cloudinary.uploader.upload(thumbnailImages[0].path);
+      updateData.thumbnailImage = uploadedThumbnail.secure_url; // Save new thumbnail
+    }
+
+    //update vandor activePackages
+    if(updateData.activeStatus)
+    {
+      vendor.activePackages += 1;
+    }
+    else if (updateData.activeStatus === false) {
+      vendor.activePackages -= 1;
+    }
+    await vendor.save();
+
+
+    // Update price, discount, and duration calculations
     if (updateData.price && updateData.discount) {
       updateData.isdiscount = updateData.discount > 0;
       updateData.percentageDiscount = parseFloat((updateData.discount / updateData.price) * 100);
     }
 
-    //Discount in input
     if (updateData.discount !== undefined && updateData.price === undefined) {
       updateData.isdiscount = updateData.discount > 0;
       if (holidayPackage.price) {
@@ -50,42 +94,22 @@ export const editHolidayPackage = async (req, res) => {
       }
     }
 
-    //Price in input
     if (updateData.price !== undefined && updateData.discount === undefined) {
       if (holidayPackage.discount)
         updateData.percentageDiscount = parseFloat((holidayPackage.discount / updateData.price) * 100);
     }
 
-    // Updating duration based on startTime and leavingTime
-    //in input both have startime & leavingTime
-    if (updateData.startTime && updateData.leavingTime) {
-      const start = new Date(updateData.startTime);
-      const leaving = new Date(updateData.leavingTime);
-      const diffDays = Math.ceil((leaving - start) / (1000 * 60 * 60 * 24));
-      updateData.duration = `${diffDays} Days`;
-    }
-    //in input have only starttime
-    if (updateData.startTime && !updateData.leavingTime) {
-      const s = new Date(updateData.startTime);
-      const l = new Date(holidayPackage.leavingTime);
-      const diffDays = Math.ceil((l - s) / (1000 * 60 * 60 * 24));
-      updateData.duration = `${diffDays} Days`;
-    }
-
-
-    if (!updateData.startTime && updateData.leavingTime) {
-      const s = new Date(holidayPackage.startTime);
-      const l = new Date(updateData.leavingTime);
-      const diffDays = Math.ceil((l - s) / (1000 * 60 * 60 * 24));
-      updateData.duration = `${diffDays} Days`;
+    if (updateData.startTime || updateData.leavingTime) {
+      const start = new Date(updateData.startTime || holidayPackage.startTime);
+      const leaving = new Date(updateData.leavingTime || holidayPackage.leavingTime);
+      updateData.duration = `${Math.ceil((leaving - start) / (1000 * 60 * 60 * 24))} Days`;
     }
 
     // Update the holiday package
     await holidayPackage.update(updateData);
 
     res.status(200).json({ message: "Holiday Package updated successfully" });
-  }
-  catch (error) {
+  } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error", error });
   }
