@@ -54,6 +54,7 @@ export const allHolidayPackages = async (req, res) => {
   }
 };
 
+
 export const searchHolidayPackages = async (req, res) => {
   try {
     const { cityOrCountry, departureDate} = req.body;
