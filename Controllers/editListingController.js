@@ -18,7 +18,7 @@ export const editHolidayPackage = async (req, res) => {
     const listingId = req.header("listingId");
     const updateData = req.body;
     const id = req.id;
-    
+
     const vendor = await Vendor.findByPk(id);
     if (!vendor) return res.status(404).json({ message: "Vendor not found" });
 
@@ -53,7 +53,7 @@ export const editHolidayPackage = async (req, res) => {
       if (holidayPackage.packageImages) {
         await deleteFromCloudinary(holidayPackage.packageImages); // Delete old images
       }
-      
+
       const uploadedImages = await Promise.all(
         packageImages.map(file => cloudinary.uploader.upload(file.path))
       );
@@ -72,8 +72,7 @@ export const editHolidayPackage = async (req, res) => {
     }
 
     //update vandor activePackages
-    if(updateData.activeStatus)
-    {
+    if (updateData.activeStatus) {
       vendor.activePackages += 1;
     }
     else if (updateData.activeStatus === false) {
@@ -121,6 +120,12 @@ export const editPackageGetData = async (req, res) => {
     const packageId = req.header('id');
     const listingId = req.header("listingId");
     const id = req.id;
+    // Validate required headers
+    if (!packageId || !listingId) {
+      return res.status(400).json({
+        message: "Missing required headers: 'id' and 'listingId'"
+      });
+    }
 
     const vendor = await Vendor.findByPk(id);
     if (!vendor) {
@@ -135,17 +140,21 @@ export const editPackageGetData = async (req, res) => {
 
     const holidayPackage = await HolidayPackage.findOne({
       where: { listingId, id: packageId },
-      include: {
-        model: Listing,
-        attributes: ['city', 'country']
-      }
+      raw: true
     });
 
     if (!holidayPackage) {
       return res.status(404).json({ message: "Holiday Package not found" });
     }
 
-    return res.status(200).json({ message: "Package Data", holidayPackage });
+    // Combine the data
+    const responseData = {
+      ...holidayPackage,
+      city: Listing1.city,
+      country: Listing1.country
+    };
+
+    return res.status(200).json({ message: "Package Data", holidayPackage: responseData});
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error", error });
@@ -170,11 +179,11 @@ export const DeleteHolidayPackage = async (req, res) => {
     }
 
     const status = await HolidayPackage.findOne({
-      where: { listingId: listing.id, name:HolidayPackageName},
+      where: { listingId: listing.id, name: HolidayPackageName },
       attributes: ['activeStatus']
     })
 
-    const isActive = status?.dataValues?.activeStatus ?? false; 
+    const isActive = status?.dataValues?.activeStatus ?? false;
 
     // Delete the Holiday Package
     const deletedHolidayPackage = await HolidayPackage.destroy({
