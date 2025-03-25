@@ -61,7 +61,7 @@ export const addHolidayPackage = async (req, res) => {
           folder: 'holiday_packages' // Optional folder in Cloudinary
         });
         console.log(result.secure_url);
-        thumbnailUrls.push(result.secure_url);
+        Photos.push(result.secure_url);
       }
     }
     if (Images) {
@@ -71,7 +71,7 @@ export const addHolidayPackage = async (req, res) => {
           folder: 'holiday_packages' // Optional folder in Cloudinary
         });
         console.log(result.secure_url);
-        Photos.push(result.secure_url);
+        thumbnailUrls.push(result.secure_url);
       }
     }
 
