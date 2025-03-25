@@ -5,6 +5,7 @@ import homestayAndVilla from "../models/homestayAndVillas.js";
 import Hotel from "../models/Hotel.js"
 import cloudinary from 'cloudinary';
 
+
 cloudinary.v2.config({
   cloud_name: process.env.cloud_name,
   api_key: process.env.api_key,
