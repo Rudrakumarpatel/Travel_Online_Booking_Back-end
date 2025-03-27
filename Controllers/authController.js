@@ -127,7 +127,7 @@ export const User_emailAuth = async (req, res) => {
     }
 
     // Generate a JWT token for the user
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '3d' });
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '5d' });
     res.json({ message: 'Email login successful', token , Username:name});
   } catch (error) {
     console.error('Error during email authentication:', error);
@@ -166,7 +166,6 @@ export const Vendor_emailAuth = async (req, res) => {
     // Check if vendor profile is complete
     const isProfileComplete = !!(
       vendor.businessName &&
-      vendor.businessType &&
       vendor.address &&
       vendor.city &&
       vendor.country
@@ -176,7 +175,7 @@ export const Vendor_emailAuth = async (req, res) => {
     const token = jwt.sign(
       { vendorId: vendor.id },
       process.env.JWT_SECRET,
-      { expiresIn: '3d' }
+      { expiresIn: '5d' }
     );
 
     res.status(200).json({

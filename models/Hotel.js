@@ -23,7 +23,7 @@ const Hotel = sequelize.define('Hotel', {
 }, { timestamps: true });
 
 // 🔹 Listing-Hotel Relationship
-Listing.hasOne(Hotel, { foreignKey: 'listingId', onDelete: 'CASCADE' });
+Listing.hasMany(Hotel, { foreignKey: 'listingId', onDelete: 'CASCADE' });
 Hotel.belongsTo(Listing, { foreignKey: 'listingId' });
 
 export default Hotel;

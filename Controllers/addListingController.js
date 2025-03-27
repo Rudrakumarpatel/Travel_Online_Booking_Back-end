@@ -5,6 +5,7 @@ import { addFirstListingEmail } from '../utility/Email_Sending.js';
 import cloudinary from 'cloudinary';
 import moment from 'moment/moment.js';
 import Hotel from '../models/Hotel.js';
+import { uploadImages } from '../utility/cloudinaryHelper.js';
 
 cloudinary.v2.config({
   cloud_name: process.env.cloud_name,
@@ -107,7 +108,7 @@ export const addHolidayPackage = async (req, res) => {
     // Step 6: Send Email if this is the first listing created by the vendor
     if (listingCount === 0) {
       const listingname = "HolidayPackage"
-      addFirstListingEmail(vendor.email, vendor.name, holidayPackage.name,listingname);
+      addFirstListingEmail(vendor.email, vendor.name, holidayPackage.name, listingname);
     }
 
     return res.status(201).json({ message: "Holiday Package added successfully", holidayPackagename: holidayPackage.name, city: listing.city });
@@ -118,11 +119,11 @@ export const addHolidayPackage = async (req, res) => {
   }
 };
 
-export const addHotels = async (req, res) => {
+export const addHotel = async (req, res) => {
 
   try {
     const id = req.id;
-    const { city, country, name, price, availableRooms, discount, location, description, amenities, checkInTime, checkOutTime, image, packageImages } = req.body;
+    const { city, country, name, price, availableRooms, discount, location, description, amenities, checkInTime, checkOutTime } = req.body;
 
     // Step 1: Check if Vendor Exists
     const vendor = await Vendor.findByPk(id);
@@ -156,28 +157,55 @@ export const addHotels = async (req, res) => {
       return res.status(400).json({ message: "A Hotel with the smme name & same location already exists." });
     }
 
+   // Step 4: Upload Images to Cloudinary and Create HolidayPackage
+   const Packageimages = req.files && req.files.Packageimages; // this is for thumbnil
+   const Images = req.files && req.files.Packagephotos;        // this is for inside package photos
+   let thumbnailUrls = [];
+   let Photos = [];
+
+   if (Packageimages) {
+     const files = Array.isArray(Packageimages) ? Packageimages : [Packageimages];
+     for (const file of files) {
+       const result = await cloudinary.v2.uploader.upload(file.tempFilePath, {
+         folder: 'Hotels' // Optional folder in Cloudinary
+       });
+       console.log(result.secure_url);
+       Photos.push(result.secure_url);
+     }
+   }
+   if (Images) {
+     const files = Array.isArray(Images) ? Images : [Images];
+     for (const file of files) {
+       const result = await cloudinary.v2.uploader.upload(file.tempFilePath, {
+         folder: 'Hotels' // Optional folder in Cloudinary
+       });
+       console.log(result.secure_url);
+       thumbnailUrls.push(result.secure_url);
+     }
+   }
+
     const hotel = await Hotel.create({
       listingId: listing.id,
       name,
       pricePerNight: price,
       discountPerNight: discount || 0,
       isdiscount: discount > 0 ? true : false,
-      percentageDiscountPerNight: discount !== 0  ? parseFloat((parseFloat(discount) / parseFloat(price)) * 100) : 0,
+      percentageDiscountPerNight: discount !== 0 ? parseFloat((parseFloat(discount) / parseFloat(price)) * 100) : 0,
       location,
       amenities,
       description: description || '',
       visitors: Math.max(1, Math.floor(price / 1000)),
       checkInTime,
       checkOutTime,
-      image: image, // Store Cloudinary URLs
-      packageImages,
+      image: thumbnailUrls, // Store Cloudinary URLs
+      packageImages: Photos,
       availableRooms,
       roomsAvailable: availableRooms > 0 ? true : false
     });
 
     if (listingCount === 0) {
       const listingname = "Hotel"
-      addFirstListingEmail(vendor.email, vendor.name, hotel.name,listingname);
+      addFirstListingEmail(vendor.email, vendor.name, hotel.name, listingname);
     }
 
     return res.status(201).json({ message: "Hotel added successfully", Hotelname: hotel.name, city: listing.city });

@@ -1,5 +1,5 @@
 import express from 'express';
-import {addHolidayPackage,addHotels} from '../Controllers/addListingController.js';
+import {addHolidayPackage,addHotel} from '../Controllers/addListingController.js';
 import verifyToken from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -84,6 +84,6 @@ router.post("/addHolidayPackage",verifyToken,addHolidayPackage);
  *       404: { description: "Vendor not found" }
  *       500: { description: "Server error" }
  */
-router.post("/addHotels",verifyToken,addHotels);
+router.post("/addHotels",verifyToken,addHotel);
 
 export default router;

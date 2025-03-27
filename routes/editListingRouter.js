@@ -1,5 +1,5 @@
 import express from 'express';
-import {DeleteHolidayPackage, editHolidayPackage, editPackageGetData} from '../Controllers/editListingController.js';
+import {DeleteHolidayPackage, editHolidayPackage, editPackageGetData,editHotel,deleteHotel,editHotelGetData} from '../Controllers/editListingController.js';
 import verifyToken from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -115,5 +115,11 @@ router.delete("/DeleteHolidayPackage",verifyToken,DeleteHolidayPackage);
  *         description: Server error
  */
 router.get("/editPackageGetData",verifyToken,editPackageGetData);
+
+router.put("/editHotel",verifyToken,editHotel);
+
+router.delete("/DeleteHotel",verifyToken,deleteHotel);
+
+router.get("/editHotelGetData",verifyToken,editHotelGetData);
 
 export default router;

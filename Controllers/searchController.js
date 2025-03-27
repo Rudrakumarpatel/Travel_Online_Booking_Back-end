@@ -5,7 +5,6 @@ export const searchLocation = async (req, res) => {
 
   const listingCity = await Listing.findAll({attributes:['city']});
 
-  console.log(listingCity);
   const cityName = listingCity.map((listing)=>listing.city);
 
   if (!city || !cityName || !Array.isArray(cityName)) {

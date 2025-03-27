@@ -57,7 +57,7 @@ export const allHolidayPackages = async (req, res) => {
 
 export const searchHolidayPackages = async (req, res) => {
   try {
-    const { cityOrCountry, departureDate} = req.body;
+    const { cityOrCountry, departureDate} = req.query;
 
     if (!cityOrCountry) {
       return res.status(400).json({ message: "City or Country is required." });
