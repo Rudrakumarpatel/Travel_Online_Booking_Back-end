@@ -1,6 +1,6 @@
 import express from 'express';
 import verifyToken from '../middlewares/authMiddleware.js';
-import { display_HolidayPackages } from '../Controllers/displayListingController.js';
+import { display_HolidayPackages, display_Hotels } from '../Controllers/displayListingController.js';
 
 const router = express.Router();
 
@@ -35,5 +35,7 @@ const router = express.Router();
  *         description: Vendor not found
  */
 router.get("/Vendor_Dashboard/Display_HolidayPackage",verifyToken,display_HolidayPackages);
+
+router.get("/Vendor_Dashboard/Display_Hotels",verifyToken,display_Hotels);
 
 export default router;

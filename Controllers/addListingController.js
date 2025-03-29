@@ -123,7 +123,7 @@ export const addHotel = async (req, res) => {
 
   try {
     const id = req.id;
-    const { city, country, name, price, availableRooms, discount, location, description, amenities, checkInTime, checkOutTime } = req.body;
+    const { city, country, name, price, availableRooms, discount, location, description, amenities,checkInTime,checkOutTime} = req.body;
 
     // Step 1: Check if Vendor Exists
     const vendor = await Vendor.findByPk(id);

@@ -1,5 +1,5 @@
 import express from 'express';
-import { allHolidayPackages, searchHolidayPackages } from '../Controllers/listringController.js';
+import { allHolidayPackages, searchHolidayPackages, searchHotels } from '../Controllers/listringController.js';
 import verifyToken from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -92,5 +92,8 @@ router.get("/allHolidayPackages",allHolidayPackages);
  *         description: Server error
  */
 router.get("/searchHolidayPackages",searchHolidayPackages);
+
+router.get("/searchHotels",searchHotels);
+
 
 export default router;

@@ -4,6 +4,7 @@ import Listing from "../models/Listing.js";
 import homestayAndVilla from "../models/homestayAndVillas.js";
 import Hotel from "../models/Hotel.js"
 import cloudinary from 'cloudinary';
+import Review from "../models/ReviewAndRating.js";
 
 
 cloudinary.v2.config({
@@ -43,9 +44,9 @@ export const editHolidayPackage = async (req, res) => {
     // Function to delete images from Cloudinary
     const deleteFromCloudinary = async (imageUrls) => {
       if (!imageUrls) return;
-    
+
       const urlsArray = Array.isArray(imageUrls) ? imageUrls : [imageUrls]; // Ensure it's an array
-    
+
       for (const url of urlsArray) {
         if (typeof url === 'string') {
           const publicId = url.split('/').pop().split('.')[0]; // Extract publicId from URL
@@ -222,6 +223,15 @@ export const DeleteHolidayPackage = async (req, res) => {
       return res.status(200).json({ message: "Holiday Package and Listing deleted successfully" });
     }
 
+    const review = await Review.destroy({
+      where: { listingId: listing.id, holidayPackageId: deletedHolidayPackage.id }
+    });
+
+    if(!review)
+    {
+      return res.status(200).json({ message: "Holiday Package & Reviews deleted successfully" });
+    }
+
     return res.status(200).json({ message: "Holiday Package deleted successfully" });
 
   } catch (error) {
@@ -255,15 +265,16 @@ export const editHotel = async (req, res) => {
 
 
     // Image Handling
-    const packageImages1 = req.files?.Packageimages; // Many images (inside package)
-    const thumbnailImages = req.files?.Packagephotos; // Thumbnail image
+    const packageImages1 = req.files && req.files?.Packageimages; // Many images (inside package)
+    const thumbnailImages = req.files && req.files?.Packagephotos; // Thumbnail image
 
     // Function to delete images from Cloudinary
     const deleteFromCloudinary = async (imageUrls) => {
+      console.log(imageUrls);
       if (!imageUrls) return;
-    
+
       const urlsArray = Array.isArray(imageUrls) ? imageUrls : [imageUrls]; // Ensure it's an array
-    
+
       for (const url of urlsArray) {
         if (typeof url === 'string') {
           const publicId = url.split('/').pop().split('.')[0]; // Extract publicId from URL
@@ -281,7 +292,7 @@ export const editHotel = async (req, res) => {
       }
 
       const uploadedImages = await Promise.all(
-        files.map(file => cloudinary.v2.uploader.upload(file.tempFilePath, { folder: 'holiday_packages' }))
+        files.map(file => cloudinary.v2.uploader.upload(file.tempFilePath, { folder: 'Hotels' }))
       );
 
       updateData.packageImages = uploadedImages.map(img => img.secure_url); // Save new images
@@ -295,7 +306,7 @@ export const editHotel = async (req, res) => {
         await deleteFromCloudinary([Hotels.image]); // Delete old thumbnail
       }
 
-      const uploadedThumbnail = await cloudinary.v2.uploader.upload(files[0].tempFilePath, { folder: 'holiday_packages' });
+      const uploadedThumbnail = await cloudinary.v2.uploader.upload(files[0].tempFilePath, { folder: 'Hotels' });
       updateData.image = uploadedThumbnail.secure_url; // Save new thumbnail
     }
 
@@ -385,23 +396,19 @@ export const deleteHotel = async (req, res) => {
       return res.status(404).json({ message: "Vendor not found" });
     }
 
-    const listing = await Listing.findOne({ where: { vendorId: id, id:listingId } });
+    const listing = await Listing.findOne({ where: { vendorId: id, id: listingId } });
 
     if (!listing) {
       return res.status(404).json({ message: "Listing not found" });
     }
 
-    const status = await Hotel.findOne({
-      where: { listingId: listing.id, id:HotelId}
-    })
-    
     // Delete the Holiday Package
-    const deletedHolidayPackage = await Hotel.destroy({
-      where: { listingId: listing.id, id:HotelId }
+    const deletedHotel = await Hotel.destroy({
+      where: { listingId: listing.id, id: HotelId }
     });
 
 
-    if (!deletedHolidayPackage) {
+    if (!deletedHotel) {
       return res.status(404).json({ message: "No Hotel is found with given details" });
     }
 
@@ -414,6 +421,15 @@ export const deleteHotel = async (req, res) => {
     if (remainingPackages === 0 && remainingHotels === 0 && remainingVillas === 0) {
       await listing.destroy();
       return res.status(200).json({ message: "Hotel and Listing deleted successfully" });
+    }
+
+    const review = await Review.destroy({
+      where: { listingId: listing.id, hotelId: deletedHotel.id }
+    });
+
+    if(!review)
+    {
+      return res.status(200).json({ message: "Hotel & Reviews deleted successfully" });
     }
 
     return res.status(200).json({ message: "Hotel deleted successfully" });
