@@ -21,49 +21,52 @@ export const allHolidayPackages = async (req, res) => {
           'description',
           'visitors', 'startTime', 'leavingTime', 'duration',
           'activeStatus', 'images', 'packageImages',
-          [Sequelize.fn('AVG', Sequelize.col('Reviews.rating')), 'averageRating']
-        ],
-        include: [
-          {
-            model: Review,
-            attributes: []
-          }
+          // [Sequelize.fn('AVG', Sequelize.col('Review.rating')), 'averageRating']
         ]
+      },
+      {
+        model: Review,
+        attributes: [],
       }
       ],
+      attributes: {
+        include: [
+          [Sequelize.fn("COALESCE", Sequelize.fn("AVG", Sequelize.col("Reviews.rating")), 0), "rating"],
+        ],
+      },
       group: ['Listing.id', 'HolidayPackages.id']
     });
 
-    const formattedListings = listings.map(listing => ({
-      id: listing.id,
-      city: listing.city,
-      country: listing.country,
-      images: listing.images,
-      HolidayPackages: listing.HolidayPackages.map(pkg => ({
-        id: pkg.id,
-        name: pkg.name,
-        price: pkg.price,
-        discount: pkg.discount,
-        isdiscount: pkg.isdiscount,
-        percentageDiscount: pkg.percentageDiscount,
-        location: pkg.location,
-        itinerary: pkg.itinerary,
-        description: pkg.description,
-        visitors: pkg.visitors,
-        startTime: pkg.startTime,
-        leavingTime: pkg.leavingTime,
-        duration: pkg.duration,
-        review: parseFloat(pkg.dataValues.averageRating || 0).toFixed(1),
-        images: pkg.images,
-        packageImages: pkg.packageImages,
-      }))
-    }));
+const formattedListings = listings.map(listing => ({
+  id: listing.id,
+  city: listing.city,
+  country: listing.country,
+  images: listing.images,
+  HolidayPackages: listing.HolidayPackages?.map(pkg => ({
+    id: pkg.id,
+    name: pkg.name,
+    price: pkg.price,
+    discount: pkg.discount,
+    isdiscount: pkg.isdiscount,
+    percentageDiscount: pkg.percentageDiscount,
+    location: pkg.location,
+    itinerary: pkg.itinerary,
+    description: pkg.description,
+    visitors: pkg.visitors,
+    startTime: pkg.startTime,
+    leavingTime: pkg.leavingTime,
+    duration: pkg.duration,
+    rating: pkg.dataValues.rating ? parseFloat(pkg.dataValues.rating.toFixed(1)) : 0,
+    images: pkg.images,
+    packageImages: pkg.packageImages,
+  }))
+}));
 
-    return res.json(formattedListings);
+return res.json(formattedListings);
   } catch (error) {
-    console.error('Error fetching holiday packages:', error);
-    return res.status(500).json({ error: 'Failed to fetch holiday packages' });
-  }
+  console.error('Error fetching holiday packages:', error);
+  return res.status(500).json({ error: 'Failed to fetch holiday packages' });
+}
 };
 
 
@@ -91,16 +94,31 @@ export const searchHolidayPackages = async (req, res) => {
           },
           attributes: ["city", "country"],
         },
+        {
+          model: Review,
+          attributes: [],
+        },
       ],
+      attributes: {
+        include: [
+          [Sequelize.fn("COALESCE", Sequelize.fn("AVG", Sequelize.col("Reviews.rating")), 0), "rating"],
+        ],
+      },
       where: whereCondition,
       order: [["visitors", "DESC"]], // Sort by visitors in descending order
+      group: ["HolidayPackage.id", "Listing.id"],
     });
 
-    if (holidayPackages.length === 0) {
+    const formattedHotels = holidayPackages.map(holidayPackage => ({
+      ...holidayPackage.toJSON(),
+      rating: holidayPackage.dataValues.rating ? parseFloat(holidayPackage.dataValues.rating.toFixed(1)) : 0,
+    }));
+
+    if (formattedHotels.length === 0) {
       return res.status(404).json({ message: "No holiday packages found for the given criteria." });
     }
 
-    return res.status(200).json({ holidayPackages });
+    return res.status(200).json({ holidayPackages : formattedHotels });
 
   } catch (error) {
     console.error(error);
@@ -132,7 +150,7 @@ export const searchHotels = async (req, res) => {
       ],
       attributes: {
         include: [
-          [Sequelize.fn("AVG", Sequelize.col("Reviews.rating")), "averageRating"],
+          [Sequelize.fn("COALESCE", Sequelize.fn("AVG", Sequelize.col("Reviews.rating")), 0), "rating"],
         ],
       },
       group: ["Hotel.id", "Listing.id"],
@@ -141,6 +159,7 @@ export const searchHotels = async (req, res) => {
 
     const formattedHotels = Hotels.map(hotel => ({
       ...hotel.toJSON(),
+      rating: hotel.dataValues.rating ? parseFloat(hotel.dataValues.rating.toFixed(1)) : 0,
       checkIn: checkIn,
       checkOut: checkOut,
     }));
