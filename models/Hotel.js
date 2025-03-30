@@ -18,8 +18,9 @@ const Hotel = sequelize.define('Hotel', {
   checkOutTime: { type: DataTypes.TIME, allowNull: false },
   visitors: { type: DataTypes.INTEGER, allowNull: true },
   description: { type: DataTypes.TEXT, allowNull: true },
+  activeStatus: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: true },
   image: { type: DataTypes.JSON, allowNull: false },
-  packageImages: {type: DataTypes.JSON,allowNull:false,defaultValue: []}
+  packageImages: { type: DataTypes.JSON, allowNull: true, defaultValue: [] }
 }, { timestamps: true });
 
 // 🔹 Listing-Hotel Relationship

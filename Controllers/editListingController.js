@@ -310,6 +310,15 @@ export const editHotel = async (req, res) => {
       updateData.image = uploadedThumbnail.secure_url; // Save new thumbnail
     }
 
+    //update vandor activePackages
+    if (updateData.activeStatus) {
+      vendor.activePackages += 1;
+    }
+    else if (updateData.activeStatus === false) {
+      vendor.activePackages -= 1;
+    }
+    await vendor.save();
+
     // Update price, discount, and duration calculations
     if (updateData.pricePerNight && updateData.discountPerNight) {
       updateData.isdiscount = updateData.discountPerNight > 0;
@@ -401,6 +410,20 @@ export const deleteHotel = async (req, res) => {
     if (!listing) {
       return res.status(404).json({ message: "Listing not found" });
     }
+
+    const status = await Hotel.findOne({
+      where: { listingId: listing.id, id: HotelId },
+      attributes: ['activeStatus']
+    })
+
+    const isActive = status?.dataValues?.activeStatus ?? false;
+
+     //update vandor activePackages
+     if (isActive) {
+      vendor.activePackages -= 1;
+    }
+    vendor.packagesUploaded -= 1;
+    await vendor.save();
 
     // Delete the Holiday Package
     const deletedHotel = await Hotel.destroy({

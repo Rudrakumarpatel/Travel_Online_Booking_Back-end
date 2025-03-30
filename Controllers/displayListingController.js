@@ -88,6 +88,7 @@ export const display_Hotels = async (req, res) => {
         'id',
         'listingId',
         'name',
+        'activeStatus',
         'availableRooms',
         [Sequelize.fn('AVG', Sequelize.col('Reviews.rating')), 'averageRating']
       ],
@@ -106,6 +107,7 @@ export const display_Hotels = async (req, res) => {
       city: pkg.Listing.city,
       hotelName: pkg.name,
       rating: pkg.dataValues.averageRating ? parseFloat(pkg.dataValues.averageRating.toFixed(1)) : 0,
+      activeStatus: pkg.activeStatus,
       availableRooms: pkg.availableRooms
     }));
 
