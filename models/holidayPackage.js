@@ -19,7 +19,7 @@ const HolidayPackage = sequelize.define('HolidayPackage', {
   duration: { type: DataTypes.STRING, allowNull: true },
   activeStatus: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: true },
   images: { type: DataTypes.JSON, allowNull: false },
-  packageImages: {type: DataTypes.JSON,allowNull:true,defaultValue: []}
+  packageImages: {type: DataTypes.JSON,allowNull:false,defaultValue: []}
 }, { timestamps: true });
 
 Listing.hasMany(HolidayPackage, { foreignKey: 'listingId', onDelete: 'CASCADE' });
