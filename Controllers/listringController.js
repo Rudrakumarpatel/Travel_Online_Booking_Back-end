@@ -99,12 +99,13 @@ export const searchHolidayPackages = async (req, res) => {
         },
       ],
       attributes: {
+        exclude: ["packageImages", "itinerary", "description","location","activeStatus","updatedAt","createdAt"],
         include: [
           [Sequelize.fn("COALESCE", Sequelize.fn("AVG", Sequelize.col("Reviews.rating")), 0), "rating"],
         ],
       },
       where: whereCondition,
-      order: [["visitors", "DESC"]], // Sort by visitors in descending order
+      order: [["visitors", "DESC"]],
       group: ["HolidayPackage.id", "Listing.id"],
     });
 
@@ -134,7 +135,7 @@ export const searchHotels = async (req, res) => {
     }
 
      // Prepare filters
-     let whereCondition = { activeStatus: true };
+     let whereCondition = { activeStatus: true,roomsAvailable: true };
 
     const Hotels = await Hotel.findAll({
       include: [
@@ -151,6 +152,7 @@ export const searchHotels = async (req, res) => {
         },
       ],
       attributes: {
+        exclude: ["packageImages", "amenities", "description","location","activeStatus","availableRooms","roomsAvailable","createdAt","updatedAt"],
         include: [
           [Sequelize.fn("COALESCE", Sequelize.fn("AVG", Sequelize.col("Reviews.rating")), 0), "rating"],
         ],
@@ -178,3 +180,4 @@ export const searchHotels = async (req, res) => {
     return res.status(500).json({ message: "Server error", error });
   }
 };
+

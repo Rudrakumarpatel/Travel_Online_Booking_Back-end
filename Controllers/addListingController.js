@@ -123,7 +123,7 @@ export const addHotel = async (req, res) => {
 
   try {
     const id = req.id;
-    const { city, country, name,pricePerNight, availableRooms, discount, location, description, amenities,activeStatus,checkInTime,checkOutTime} = req.body;
+    const { city, country, name,pricePerNight, availableRooms, discountPerNight, location, description, amenities,activeStatus,checkInTime,checkOutTime} = req.body;
 
     // Step 1: Check if Vendor Exists
     const vendor = await Vendor.findByPk(id);
@@ -187,10 +187,12 @@ export const addHotel = async (req, res) => {
     const hotel = await Hotel.create({
       listingId: listing.id,
       name,
-      pricePerNight,
-      discountPerNight: discount || 0,
-      isdiscount: discount > 0 ? true : false,
-      percentageDiscountPerNight: discount !== 0 ? parseFloat((parseFloat(discount) / parseFloat(pricePerNight)) * 100) : 0,
+      pricePerNight : pricePerNight > 0 ? pricePerNight : 0,
+      discountPerNight: discountPerNight || 0,
+      isdiscount: discountPerNight > 0 ? true : false,
+      percentageDiscountPerNight: (discountPerNight > 0 && pricePerNight > 0) 
+      ? parseFloat((parseFloat(discountPerNight) / parseFloat(pricePerNight)) * 100).toFixed(2) 
+      : 0,
       location,
       amenities,
       description: description || '',

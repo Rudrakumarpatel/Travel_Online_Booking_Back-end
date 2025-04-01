@@ -11,6 +11,7 @@ import addListing from './routes/addListingRoute.js'
 import editListing from './routes/editListingRouter.js'
 import fileUpload from 'express-fileupload';
 import Dashboard from './routes/Dashboard.js';
+import ListingViewDetailsRoute from './routes/ListingViewDetailsRoute.js';
 import { swaggerUi, swaggerDocs } from "./swagger.js";
 
 dotenv.config();
@@ -43,6 +44,7 @@ app.use("/api/allListing", allListing);
 app.use("/api/addListing", addListing);
 app.use("/api/EditListing", editListing);
 app.use("/api/Dashboard", Dashboard);
+app.use("/api/SeachListing",ListingViewDetailsRoute);
 
 // Start the server
 const PORT = process.env.PORT || 5001;
