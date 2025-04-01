@@ -13,7 +13,11 @@ const Review = sequelize.define('Review', {
   hotelId: { type: DataTypes.INTEGER, allowNull: true },
   holidayPackageId: { type: DataTypes.INTEGER, allowNull: true },
   villaId: { type: DataTypes.INTEGER, allowNull: true },
-  rating: { type: DataTypes.FLOAT, allowNull: false, validate: { min: 0, max: 5 },defaultValue:0},
+  rating: { type: DataTypes.FLOAT, allowNull: false, validate: { min: 0, max: 5 }, defaultValue: 0 },
+  reviewType: {
+    type: DataTypes.ENUM("Excellent", "Very Good", "Good", "Poor"),
+    allowNull: false
+  },
   comment: { type: DataTypes.TEXT, allowNull: true }
 }, { timestamps: true });
 
@@ -22,6 +26,18 @@ Review.addHook("beforeValidate", (review) => {
   if (count !== 1) {
     throw new Error("A review must belong to exactly one entity (Hotel, HolidayPackage, or Villa).");
   }
+
+  // Set reviewType based on rating
+  if (Review.rating >= 4.5) {
+    Review.reviewType = "Excellent";
+  } else if (Review.rating >= 3.5) {
+    Review.reviewType = "Very Good";
+  } else if (Review.rating >= 2.5) {
+    Review.reviewType = "Good";
+  } else {
+    Review.reviewType = "Poor";
+  }
+
 });
 
 Listing.hasMany(Review, { foreignKey: 'listingId', onDelete: 'CASCADE' });
