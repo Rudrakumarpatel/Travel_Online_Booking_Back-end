@@ -8,7 +8,7 @@ import User from '../models/User.js';
 
 export const packageViewDetails = async (req, res) => {
   try {
-    const { holidayPackageId } = req.body;
+    const { holidayPackageId }  = req.query;
 
     if (!holidayPackageId) {
       return res.status(400).json({ error: "holidayPackageId is required" });
@@ -19,7 +19,7 @@ export const packageViewDetails = async (req, res) => {
       include: [
         {
           model: Listing,
-          attributes: ["id"], // Fetch Listing ID
+          attributes: ["id","city","country"], // Fetch Listing ID
           include: {
             model: Vendor,
             attributes: ["name", "email"], // Fetch Vendor details
@@ -58,7 +58,7 @@ export const packageViewDetails = async (req, res) => {
 
 export const hotelViewDetails = async (req, res) => {
   try {
-    const { hotelId } = req.body;
+    const { hotelId } = req.query;
 
     if (!hotelId) {
       return res.status(400).json({ error: "hotelId is required" });
@@ -69,7 +69,7 @@ export const hotelViewDetails = async (req, res) => {
       include: [
         {
           model: Listing,
-          attributes: ["id"], // Fetch Listing ID
+          attributes: ["id","city","country"], // Fetch Listing ID
           include: {
             model: Vendor,
             attributes: ["name", "email"], // Fetch Vendor details
