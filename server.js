@@ -45,7 +45,7 @@ app.use("/api/allListing", allListing);
 app.use("/api/addListing", addListing);
 app.use("/api/EditListing", editListing);
 app.use("/api/Dashboard", Dashboard);
-app.use("/api/SeachListing",ListingViewDetailsRoute);
+app.use("/api/SearchListing",ListingViewDetailsRoute);
 app.use("/api/paymentGatway",paymentRoute)
 
 // Start the server
