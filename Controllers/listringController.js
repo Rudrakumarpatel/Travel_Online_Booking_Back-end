@@ -128,14 +128,16 @@ export const searchHolidayPackages = async (req, res) => {
 
 export const searchHotels = async (req, res) => {
   try {
-    const { cityOrCountry, checkIn, checkOut } = req.query;
+    const { cityOrCountry, checkIn, checkOut,rooms} = req.query;
 
     if (!cityOrCountry) {
       return res.status(400).json({ message: "City or Country is required." });
     }
 
      // Prepare filters
-     let whereCondition = { activeStatus: true,roomsAvailable: true };
+     let whereCondition = { activeStatus: true,roomsAvailable: true,availableRooms: {
+      [Op.gte]: rooms,
+    },};
 
     const Hotels = await Hotel.findAll({
       include: [
@@ -152,7 +154,7 @@ export const searchHotels = async (req, res) => {
         },
       ],
       attributes: {
-        exclude: ["packageImages", "amenities", "description","location","activeStatus","availableRooms","roomsAvailable","createdAt","updatedAt"],
+        exclude: ["packageImages", "amenities", "description","location","activeStatus","roomsAvailable","createdAt","updatedAt"],
         include: [
           [Sequelize.fn("COALESCE", Sequelize.fn("AVG", Sequelize.col("Reviews.rating")), 0), "rating"],
         ],

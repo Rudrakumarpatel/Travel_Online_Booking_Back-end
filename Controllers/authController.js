@@ -107,7 +107,7 @@ export const User_emailAuth = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { name,email, password } = req.body; 
+  const { name,email, password,mobile} = req.body; 
 
   try {
     let user = await User.findOne({ where: { email } });
@@ -116,7 +116,7 @@ export const User_emailAuth = async (req, res) => {
       // Create new user if email doesn't exist
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
-      user = await User.create({name,email, password: hashedPassword });
+      user = await User.create({name,email, password: hashedPassword, mobile });
       await LoginEmail(email,name,"User");  // Send email to user after successful login
     } else {
       // Check if password matches
@@ -128,7 +128,7 @@ export const User_emailAuth = async (req, res) => {
 
     // Generate a JWT token for the user
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '5d' });
-    res.json({ message: 'Email login successful', token , Username:name});
+    res.json({ message: 'Email login successful', token , Username:name,email:user.email,mobile:user.mobile}); // Send user details in response
   } catch (error) {
     console.error('Error during email authentication:', error);
     res.status(500).json({ message: 'Email authentication failed' });
