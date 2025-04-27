@@ -4,18 +4,18 @@ import { Op } from 'sequelize';
 
 export const percentageOffers = async (req, res) => {
   try {
-    const {percentageDiscount} = req.body;
+    const { percentageDiscount } = req.query;
 
     const listings = await Listing.findAll({
       where: { type: 'HolidayPackage' },
-      attributes: ['id', 'city', 'country','images'],
+      attributes: ['id', 'city', 'country', 'images'],
       include: [
         {
           model: HolidayPackage,
           as: "HolidayPackages",
           required: true,
           where: {
-            percentageDiscount: { [Op.lte]: percentageDiscount }
+            percentageDiscount: { [Op.gt]: 0, [Op.lte]: percentageDiscount }
           },
           attributes: [
             'percentageDiscount',
@@ -96,7 +96,7 @@ const fetchHolidayPackages = async (filter) => {
 
   const listings = await Listing.findAll({
     where: whereCondition,
-    attributes: ['id','city', 'country', 'images'], // Added 'image' attribute
+    attributes: ['id', 'city', 'country','images'], // Added 'image' attribute
     include: [{
       model: HolidayPackage,
       where: { isdiscount: true,activeStatus:true},
@@ -114,7 +114,7 @@ const groupByCity = (listings) => {
     if (!acc[city]) {
       acc[city] = [];
     }
-    
+
     acc[city].push({
       id: listing.id,
       city: listing.city,

@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs';
+import { constants, readFileSync } from 'fs';
 import fs from 'fs';
 import { readFile } from 'fs/promises';
 import Listing from '../models/Listing.js';
@@ -71,7 +71,7 @@ return res.json(formattedListings);
 
 export const searchHolidayPackages = async (req, res) => {
   try {
-    const { cityOrCountry, departureDate } = req.query;
+    const { cityOrCountry, departureDate, minPrice, maxPrice, rating} = req.query;
 
     if (!cityOrCountry) {
       return res.status(400).json({ message: "City or Country is required." });
@@ -81,7 +81,12 @@ export const searchHolidayPackages = async (req, res) => {
     let whereCondition = { activeStatus: true };
 
     if (departureDate) {
-      whereCondition.startTime = { [Op.eq]: new Date(departureDate) };
+      const parsedDepartureDate = new Date(departureDate);
+      whereCondition.startTime = { [Op.eq]: parsedDepartureDate };
+    }
+
+    if (minPrice && maxPrice) {
+      whereCondition.price = { [Op.between]: [minPrice, maxPrice] };
     }
 
     const holidayPackages = await HolidayPackage.findAll({
@@ -109,16 +114,20 @@ export const searchHolidayPackages = async (req, res) => {
       group: ["HolidayPackage.id", "Listing.id"],
     });
 
-    const formattedHotels = holidayPackages.map(holidayPackage => ({
+    let formattedPackages = holidayPackages.map(holidayPackage => ({
       ...holidayPackage.toJSON(),
       rating: holidayPackage.dataValues.rating ? parseFloat(holidayPackage.dataValues.rating.toFixed(1)) : 0,
     }));
 
-    if (formattedHotels.length === 0) {
+    if (rating) {
+      formattedPackages = formattedPackages.filter(pkg => pkg.rating >= parseFloat(rating));
+    }
+
+    if (formattedPackages.length === 0) {
       return res.status(404).json({ message: "No holiday packages found for the given criteria." });
     }
 
-    return res.status(200).json({ holidayPackages : formattedHotels });
+    return res.status(200).json({ holidayPackages : formattedPackages });
 
   } catch (error) {
     console.error(error);
@@ -128,7 +137,7 @@ export const searchHolidayPackages = async (req, res) => {
 
 export const searchHotels = async (req, res) => {
   try {
-    const { cityOrCountry, checkIn, checkOut,rooms} = req.query;
+    const { cityOrCountry, checkIn, checkOut,rooms,minPrice, maxPrice, rating} = req.query;
 
     if (!cityOrCountry) {
       return res.status(400).json({ message: "City or Country is required." });
@@ -136,8 +145,12 @@ export const searchHotels = async (req, res) => {
 
      // Prepare filters
      let whereCondition = { activeStatus: true,roomsAvailable: true,availableRooms: {
-      [Op.gte]: rooms,
+      [Op.gte]: rooms ? rooms : 0,
     },};
+
+    if (minPrice && maxPrice) {
+      whereCondition.pricePerNight = { [Op.between]: [(minPrice ? minPrice : 0), maxPrice] };
+    }
 
     const Hotels = await Hotel.findAll({
       include: [
@@ -164,12 +177,16 @@ export const searchHotels = async (req, res) => {
       order: [["visitors", "DESC"]],
     });
 
-    const formattedHotels = Hotels.map(hotel => ({
+    let formattedHotels = Hotels.map(hotel => ({
       ...hotel.toJSON(),
       rating: hotel.dataValues.rating ? parseFloat(hotel.dataValues.rating.toFixed(1)) : 0,
       checkIn: checkIn,
       checkOut: checkOut,
     }));
+
+    if (rating) {
+      formattedHotels = formattedHotels.filter(pkg => pkg.rating >= parseFloat(rating));
+    }
 
     if (Hotels.length === 0) {
       return res.status(404).json({ message: "No hotels found for the given criteria." });

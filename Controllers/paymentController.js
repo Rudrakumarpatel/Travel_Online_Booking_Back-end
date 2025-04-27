@@ -72,7 +72,7 @@ export const verify_Payment = async (req, res) => {
 
     if (isAuthentic) {
       return res.status(200).json({
-        message: "Payment Successful",
+        success: "Payment Successful",
         paymentStatus: payment.paymentStatus,
       });
     } else {
