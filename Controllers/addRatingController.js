@@ -8,11 +8,9 @@ export const addRating = async (req, res) => {
   try {
     const { ListingId, rating, review, type, typeId } = req.body;
     const id = req.id;
-    console.log(req.body);
     const listing = await Listing.findOne({ where: { id: ListingId } });
 
     if (!listing) return res.status(404).json({ message: "Listing not found" });
-    console.log(req.body);
 
     //reviewType
     let reviewType = "";
@@ -26,13 +24,8 @@ export const addRating = async (req, res) => {
       reviewType = "Poor";
     }
 
-    console.log(req.body);
-
-
     if (type === "Hotel") {
       const hotel = await Hotel.findOne({ where: { id: typeId } });
-
-      console.log(req.body);
 
       if (!hotel) return res.status(404).json({ message: "Hotel not found" });
       
