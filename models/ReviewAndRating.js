@@ -21,25 +21,6 @@ const Review = sequelize.define('Review', {
   comment: { type: DataTypes.TEXT, allowNull: true }
 }, { timestamps: true });
 
-Review.addHook("beforeValidate", (review) => {
-  const count = [review.hotelId, review.holidayPackageId, review.villaId].filter(id => id !== null).length;
-  if (count !== 1) {
-    throw new Error("A review must belong to exactly one entity (Hotel, HolidayPackage, or Villa).");
-  }
-
-  // Set reviewType based on rating
-  if (Review.rating >= 4.5) {
-    Review.reviewType = "Excellent";
-  } else if (Review.rating >= 3.5) {
-    Review.reviewType = "Very Good";
-  } else if (Review.rating >= 2.5) {
-    Review.reviewType = "Good";
-  } else {
-    Review.reviewType = "Poor";
-  }
-
-});
-
 Listing.hasMany(Review, { foreignKey: 'listingId', onDelete: 'CASCADE' });
 Review.belongsTo(Listing, { foreignKey: 'listingId' });
 

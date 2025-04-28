@@ -13,6 +13,7 @@ import fileUpload from 'express-fileupload';
 import Dashboard from './routes/Dashboard.js';
 import ListingViewDetailsRoute from './routes/ListingViewDetailsRoute.js';
 import paymentRoute from './routes/PaymentRoute.js';
+import addRating from './routes/addRatingRoute.js';
 import { swaggerUi, swaggerDocs } from "./swagger.js";
 
 dotenv.config();
@@ -47,6 +48,7 @@ app.use("/api/EditListing", editListing);
 app.use("/api/Dashboard", Dashboard);
 app.use("/api/SearchListing",ListingViewDetailsRoute);
 app.use("/api/paymentGatway",paymentRoute)
+app.use("/api/Rating", addRating);
 
 // Start the server
 const PORT = process.env.PORT || 5001;

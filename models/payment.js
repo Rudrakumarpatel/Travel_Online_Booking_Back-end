@@ -19,7 +19,7 @@ const Payment = sequelize.define('Payment', {
     allowNull: false,
   },
   listingType: {
-    type: DataTypes.ENUM('Hotel', 'HolidayPackage', 'HomestayVilla'),
+    type: DataTypes.ENUM('Hotel', 'HolidayPackage', 'Homestay&Villa'),
     allowNull: false,
   },
   razorpay_order_id: {

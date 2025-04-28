@@ -2,7 +2,7 @@ import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/db.js';
 import Listing from './Listing.js';
 
-const HomestayVilla = sequelize.define('Homestay&Villa', {
+const HomestayVilla = sequelize.define('HomestayVilla', {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
   listingId: { type: DataTypes.INTEGER, allowNull: false },
   pricePerNight: { type: DataTypes.FLOAT, allowNull: false },
@@ -13,6 +13,7 @@ const HomestayVilla = sequelize.define('Homestay&Villa', {
   amenities: { type: DataTypes.STRING, allowNull: true },
   checkInTime: { type: DataTypes.TIME, allowNull: true },
   checkOutTime: { type: DataTypes.TIME, allowNull: true },
+  visitors: { type: DataTypes.INTEGER, allowNull: true },
   image: { type: DataTypes.STRING, allowNull: true }
 }, { timestamps: true });
 

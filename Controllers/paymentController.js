@@ -2,6 +2,9 @@ import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import Payment from '../models/payment.js';
 import User from '../models/User.js';
+import Hotel from '../models/Hotel.js';
+import HolidayPackage from '../models/holidayPackage.js';
+import HomestayVilla from '../models/homestayAndVillas.js';
 
 const instance = new Razorpay({
   key_id: process.env.KEY_ID,
@@ -71,6 +74,34 @@ export const verify_Payment = async (req, res) => {
     }
 
     if (isAuthentic) {
+      if (listingType === "Hotel") {
+        const hotel = await Hotel.findOne({ where: { id: itemId } });
+        if (!hotel) return res.status(404).json({ message: "Hotel not found" });
+        const updatedHotel = await Hotel.update(
+          { availableRooms: hotel.availableRooms - 1 },
+          { visitors: hotel.visitors + 1 },
+          { where: { id: itemId } }
+        );
+      }
+      else if (listingType === "HolidayPackage") {
+        const holidayPackage = await HolidayPackage.findOne({ where: { id: itemId } });
+        if (!holidayPackage) return res.status(404).json({ message: "Holiday Package not found" });
+        const updatedHolidayPackage = await HolidayPackage.update(
+          { visitors: holidayPackage.visitors + 1 },
+          { where: { id: itemId } }
+        );
+      }
+      else if (listingType === "Homestay&Villa") {
+        const villa = await HomestayVilla.findOne({ where: { id: itemId } });
+        if (!villa) return res.status(404).json({ message: "Villa not found" });
+        const updatedVilla = await HomestayVilla.update(
+          { visitors: villa.visitors + 1 },
+          { where: { id: itemId } }
+        );
+      }
+      else {
+        return res.status(400).json({ message: "Invalid listing type" });
+      }
       return res.status(200).json({
         success: "Payment Successful",
         paymentStatus: payment.paymentStatus,
